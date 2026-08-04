@@ -1,28 +1,39 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsNumber, Min, Max, IsArray } from 'class-validator';
+import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { SLAVIC_GOD_IDS } from '../../gods/slavic-gods.constants';
 
 export class PerformRitualDto {
     @ApiProperty({
-        description: 'Тип ритуала',
-        enum: ['purification', 'blessing', 'consecration', 'shadow_weaving', 'chaos_embrace', 'coition', 'offerJob '],
-        example: 'purification'
+        description: 'Бог пантеона, которому адресован ритуал',
+        enum: SLAVIC_GOD_IDS,
+        example: 'veles',
     })
     @IsString()
     @IsNotEmpty()
+    @IsIn(SLAVIC_GOD_IDS)
+    godName: string;
+
+    @ApiProperty({
+        description: 'Тип ритуала',
+        enum: ['purification', 'blessing', 'consecration', 'weaving', 'coition', 'offer'],
+        example: 'purification',
+    })
+    @IsString()
+    @IsNotEmpty()
+    @IsIn(['purification', 'blessing', 'consecration', 'weaving', 'coition', 'offer'])
     ritualType: string;
 
     @ApiProperty({
-        description: 'принимаемая сторона',
-        example: 'человек(имя фамилия)'
+        description: 'Принимающая сторона',
+        example: 'человек(имя фамилия)',
     })
     @IsString()
     @IsNotEmpty()
-    person: string
-
+    person: string;
 
     @ApiProperty({
         description: 'Локация проведения ритуала',
-        example: 'Нижегородский кремль'
+        example: 'Нижегородский кремль',
     })
     @IsString()
     @IsNotEmpty()
@@ -30,7 +41,7 @@ export class PerformRitualDto {
 
     @ApiProperty({
         description: 'Интенсивность ритуала (1-100)',
-        example: 75
+        example: 75,
     })
     @IsNumber()
     @Min(1)
@@ -38,10 +49,11 @@ export class PerformRitualDto {
     intensity: number;
 
     @ApiProperty({
-        description: 'ID проводящего ритуал',
-        example: 'vugar_guliev_1996'
+        description: 'ID проводящего ритуал (не нужен при JWT — берётся из токена)',
+        example: 'vugar_guliev_1996',
+        required: false,
     })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
-    invokerId: string;
+    invokerId?: string;
 }

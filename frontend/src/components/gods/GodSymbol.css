@@ -1,0 +1,35 @@
+.god-symbol {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--god-color) 70%, var(--gold));
+  background: radial-gradient(
+    circle at 30% 30%,
+    color-mix(in srgb, var(--god-color) 35%, transparent),
+    rgba(8, 12, 20, 0.85)
+  );
+  box-shadow: 0 0 16px color-mix(in srgb, var(--god-color) 25%, transparent);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.god-symbol--active {
+  transform: scale(1.06);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--god-color) 45%, var(--gold));
+}
+
+.god-symbol-glyph {
+  position: absolute;
+  font-size: 0.65rem;
+  top: 4px;
+  color: var(--gold);
+  opacity: 0.7;
+}
+
+.god-symbol-initial {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  color: var(--parchment);
+  text-shadow: 0 0 8px var(--god-color);
+}

@@ -1,0 +1,18 @@
+.oracle-form {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.contact-ai-hint {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--parchment-dim);
+  opacity: 0.75;
+  text-align: center;
+}
+
+.result-box {
+  white-space: pre-wrap;
+}

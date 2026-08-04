@@ -1,14 +1,16 @@
 import { Module } from '@nestjs/common';
 import { RealityController } from './reality.controller';
 import { RealityService } from './reality.service';
-import { BloodlineService } from '../bloodline/bloodline.service';
-import { BalanceService } from '../balance/balance.service';
 import { RitualsService } from '../rituals/rituals.service';
-import {GodsService} from "../goods/gods.service";
+import { GodsService } from '../gods/gods.service';
+import { DatabaseModule } from '../database/database.module';
+import { AiModule } from '../ai/ai.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
+    imports: [AiModule, DatabaseModule, AuthModule],
     controllers: [RealityController],
-    providers: [RealityService, BloodlineService, GodsService, BalanceService, RitualsService],
+    providers: [RealityService, GodsService, RitualsService],
     exports: [RealityService],
 })
 export class RealityModule {}

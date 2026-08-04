@@ -1,101 +1,195 @@
-import { Controller, Post, Body, Get, Param, Put, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import {
+    Controller,
+    Post,
+    Body,
+    Get,
+    HttpStatus,
+    Query,
+    UseGuards,
+} from '@nestjs/common';
+import {
+    ApiTags,
+    ApiOperation,
+    ApiResponse,
+    ApiBody,
+    ApiBearerAuth,
+    ApiQuery,
+} from '@nestjs/swagger';
 import { RealityService } from './reality.service';
-import { AwakenBloodlineDto } from './dto/awaken-bloodline.dto';
-import { ContactGodDto } from './dto/contact-god.dto';
-import { CreateBalanceDto } from './dto/create-balance.dto';
 import { PerformRitualDto } from './dto/perform-ritual.dto';
+import { RegisterUserDto } from './dto/register-user.dto';
+import { ConfirmEmailDto } from './dto/confirm-email.dto';
+import { GodOracleDto } from './dto/god-oracle.dto';
+import { LoginDto } from './dto/login.dto';
+import { CreateSupportTicketDto } from './dto/create-support-ticket.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { AuthUser } from '../auth/jwt-payload.interface';
 
 @ApiTags('reality')
 @Controller('reality')
 export class RealityController {
     constructor(private readonly realityService: RealityService) {}
 
-    @Post('awaken-bloodline')
+    @Post('auth/register')
+    @ApiTags('auth')
     @ApiOperation({
-        summary: 'Пробуждение родовой крови',
-        description: 'Активация наследственных сил предков и пробуждение родовой памяти'
+        summary: 'Регистрация пользователя',
+        description: 'Создаёт пользователя в БД и возвращает ссылку подтверждения email',
     })
-    @ApiResponse({ status: HttpStatus.CREATED, description: 'Родовая кровь успешно пробуждена' })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Ошибка верификации родовой линии' })
-    @ApiBody({ type: AwakenBloodlineDto })
-    async awakenBloodline(@Body() awakenDto: AwakenBloodlineDto) {
-        return this.realityService.awakenBloodline(awakenDto);
+    @ApiResponse({ status: HttpStatus.CREATED, description: 'Пользователь зарегистрирован' })
+    @ApiBody({ type: RegisterUserDto })
+    async registerUser(@Body() registerUserDto: RegisterUserDto) {
+        return this.realityService.registerUser(registerUserDto);
     }
 
-    @Post('gods/contact')
+    @Get('auth/confirm-email')
+    @ApiTags('auth')
     @ApiOperation({
-        summary: 'Контакт с богом',
-        description: 'Установление связи с одним из славянских богов и получение божественного дара'
+        summary: 'Подтверждение email',
+        description: 'Подтверждает email пользователя по токену из письма',
     })
-    @ApiResponse({ status: HttpStatus.CREATED, description: 'Контакт успешно установлен' })
-    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Дух не готов к божественному контакту' })
-    @ApiBody({ type: ContactGodDto })
-    async contactGod(@Body() contactDto: ContactGodDto) {
-        return this.realityService.contactGod(contactDto);
+    @ApiQuery({ name: 'token', required: true })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Email подтвержден' })
+    async confirmEmail(@Query('token') token: string) {
+        const dto: ConfirmEmailDto = { token };
+        return this.realityService.confirmEmail(dto);
     }
 
-    @Post('balance/create')
+    @Post('auth/login')
+    @ApiTags('auth')
     @ApiOperation({
-        summary: 'Создание баланса',
-        description: 'Создание точки равновесия между мирами Яви, Прави и Нави'
+        summary: 'Вход (JWT)',
+        description: 'Проверяет email/пароль и возвращает Bearer JWT accessToken',
     })
-    @ApiResponse({ status: HttpStatus.CREATED, description: 'Баланс успешно создан' })
-    @ApiBody({ type: CreateBalanceDto })
-    async createBalance(@Body() balanceDto: CreateBalanceDto) {
-        return this.realityService.createBalance(balanceDto);
+    @ApiBody({ type: LoginDto })
+    @ApiResponse({ status: HttpStatus.OK, description: 'JWT выдан' })
+    async login(@Body() loginDto: LoginDto) {
+        return this.realityService.login(loginDto);
+    }
+
+    @Post('auth/logout')
+    @ApiTags('auth')
+    @ApiBearerAuth('JWT-auth')
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({
+        summary: 'Выход',
+        description: 'Инвалидирует текущую JWT-сессию',
+    })
+    async logout(@CurrentUser() user: AuthUser) {
+        return this.realityService.logout(user);
+    }
+
+    @Get('auth/me')
+    @ApiTags('auth')
+    @ApiBearerAuth('JWT-auth')
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({
+        summary: 'Текущий пользователь',
+        description: 'Возвращает профиль по JWT Bearer-токену',
+    })
+    async getCurrentUser(@CurrentUser() user: AuthUser) {
+        return this.realityService.getCurrentUser(user);
+    }
+
+    @Get('gods')
+    @ApiTags('gods')
+    @ApiOperation({
+        summary: 'Список славянских богов',
+        description: 'Полный пантеон для UI и выбора оракула',
+    })
+    listGods() {
+        return this.realityService.listGods();
+    }
+
+    @Post('gods/oracle')
+    @ApiTags('gods')
+    @ApiBearerAuth('JWT-auth')
+    @UseGuards(OptionalJwtAuthGuard)
+    @ApiOperation({
+        summary: 'Пророчество бога (ИИ)',
+        description:
+            'Ответ выбранного божества через LLM. JWT опционален: при наличии userId берётся из токена.',
+    })
+    @ApiBody({ type: GodOracleDto })
+    async askOracle(@Body() dto: GodOracleDto, @CurrentUser() user?: AuthUser) {
+        return this.realityService.askOracle(dto, user);
+    }
+
+    @Get('oracle/history')
+    @ApiTags('gods')
+    @ApiBearerAuth('JWT-auth')
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({
+        summary: 'История сообщений оракула',
+        description: 'История пророчеств текущего авторизованного пользователя',
+    })
+    async getOracleHistory(@CurrentUser() user: AuthUser) {
+        return this.realityService.getOracleHistory(user.userId);
+    }
+
+    @Get('rituals/types')
+    @ApiTags('rituals')
+    @ApiOperation({
+        summary: 'Типы ритуалов',
+        description: 'Список доступных типов ритуалов из базы данных',
+    })
+    async getRitualTypes() {
+        return this.realityService.getRitualTypes();
     }
 
     @Post('rituals/perform')
+    @ApiTags('rituals')
+    @ApiBearerAuth('JWT-auth')
+    @UseGuards(OptionalJwtAuthGuard)
     @ApiOperation({
         summary: 'Выполнение ритуала',
-        description: 'Проведение магического ритуала для воздействия на реальность'
+        description:
+            'Проведение магического ритуала с сохранением в историю. При JWT invokerId берётся из токена.',
     })
-    @ApiResponse({ status: HttpStatus.CREATED, description: 'Ритуал успешно выполнен' })
     @ApiBody({ type: PerformRitualDto })
-    async performRitual(@Body() ritualDto: PerformRitualDto) {
-        return this.realityService.performRitual(ritualDto);
+    async performRitual(@Body() ritualDto: PerformRitualDto, @CurrentUser() user?: AuthUser) {
+        return this.realityService.performRitual(ritualDto, user);
     }
 
-    @Get('character/:id')
+    @Get('rituals/history')
+    @ApiTags('rituals')
+    @ApiBearerAuth('JWT-auth')
+    @UseGuards(JwtAuthGuard)
     @ApiOperation({
-        summary: 'Получение информации о персонаже',
-        description: 'Получение полной информации о Вугаре - последнем хранителе'
+        summary: 'История ритуалов',
+        description: 'История выполненных ритуалов текущего авторизованного пользователя',
     })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Информация о персонаже' })
-    @ApiParam({ name: 'id', description: 'ID персонажа', example: 'vugar_guliev' })
-    async getCharacter(@Param('id') id: string) {
-        return this.realityService.getCharacter(id);
+    async getRitualHistory(@CurrentUser() user: AuthUser) {
+        return this.realityService.getRitualHistory(user.userId);
     }
 
-    @Get('scenes/:act')
+    @Post('support')
+    @ApiTags('support')
+    @ApiBearerAuth('JWT-auth')
+    @UseGuards(OptionalJwtAuthGuard)
     @ApiOperation({
-        summary: 'Получение сцен по актам',
-        description: 'Получение списка сцен для указанного акта сценария'
+        summary: 'Обращение в поддержку',
+        description: 'Создаёт тикет для связи с модератором. При JWT email/имя берутся из профиля.',
     })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Список сцен' })
-    @ApiParam({ name: 'act', description: 'Номер акта', example: '1' })
-    async getScenes(@Param('act') act: string) {
-        return this.realityService.getScenes(act);
+    @ApiBody({ type: CreateSupportTicketDto })
+    async createSupportTicket(
+        @Body() dto: CreateSupportTicketDto,
+        @CurrentUser() user?: AuthUser,
+    ) {
+        return this.realityService.createSupportTicket(dto, user);
     }
 
-    @Put('skills/upgrade')
+    @Get('support')
+    @ApiTags('support')
+    @ApiBearerAuth('JWT-auth')
+    @UseGuards(JwtAuthGuard)
     @ApiOperation({
-        summary: 'Улучшение навыков',
-        description: 'Повышение уровня технических или магических навыков персонажа'
+        summary: 'Мои обращения в поддержку',
+        description: 'Список обращений текущего пользователя со статусами',
     })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Навыки успешно улучшены' })
-    async upgradeSkills(@Body() upgradeDto: any) {
-        return this.realityService.upgradeSkills(upgradeDto);
-    }
-
-    @Get('status')
-    @ApiOperation({
-        summary: 'Статус системы',
-        description: 'Получение текущего статуса всей славянской реальной системы'
-    })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Статус системы' })
-    async getSystemStatus() {
-        return this.realityService.getSystemStatus();
+    async getSupportTickets(@CurrentUser() user: AuthUser) {
+        return this.realityService.getSupportTickets(user.userId);
     }
 }

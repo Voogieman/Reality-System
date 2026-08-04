@@ -1,0 +1,43 @@
+
+.footer {
+  padding: 3rem 0;
+  border-top: 1px solid rgba(201, 162, 39, 0.2);
+  background: rgba(5, 8, 16, 0.75);
+  backdrop-filter: blur(12px);
+}
+
+.footer-inner {
+  text-align: center;
+}
+
+.footer-ornament {
+  font-size: 1.2rem;
+  color: var(--gold);
+  letter-spacing: 0.5em;
+  margin-bottom: 1rem;
+  opacity: 0.6;
+}
+
+.footer-text {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  color: var(--parchment-dim);
+  margin-bottom: 0.5rem;
+}
+
+.footer-realms {
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.5;
+  margin-bottom: 1rem;
+}
+
+.footer-copy {
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--parchment-dim);
+  opacity: 0.4;
+}

@@ -1,0 +1,53 @@
+.gods-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  margin-bottom: 2rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.gods-search {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.65rem 0.85rem;
+  color: var(--parchment);
+  background: rgba(10, 22, 18, 0.8);
+  border: 1px solid rgba(201, 162, 39, 0.25);
+  border-radius: 2px;
+}
+
+.gods-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+  max-width: 1100px;
+  margin: 0 auto 2rem;
+}
+
+.god-detail {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem;
+}
+
+.god-detail h3 {
+  color: var(--amber);
+  margin-bottom: 0.75rem;
+  font-size: 1.4rem;
+}
+
+.god-detail-desc {
+  font-style: italic;
+  margin-bottom: 1rem;
+  color: var(--parchment-dim);
+}
+
+.god-detail p {
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}

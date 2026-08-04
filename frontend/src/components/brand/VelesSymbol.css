@@ -1,0 +1,15 @@
+.veles-symbol {
+  color: var(--amber, #e8b923);
+  filter: drop-shadow(0 0 8px rgba(232, 185, 35, 0.4));
+  flex-shrink: 0;
+  display: block;
+}
+
+.veles-symbol-horns,
+.veles-symbol-body {
+  transform-origin: center center;
+}
+
+.header-logo:hover .veles-symbol {
+  filter: drop-shadow(0 0 10px rgba(232, 185, 35, 0.55)) brightness(1.08);
+}
