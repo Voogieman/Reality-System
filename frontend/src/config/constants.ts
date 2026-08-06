@@ -10,10 +10,9 @@ export const RITUAL_TYPES = [
 ] as const;
 
 export const NAV_ITEMS = [
-  { href: '#gods', label: 'Пантеон' },
-  { href: '#oracle', label: 'Оракул' },
-  { href: '#ritual', label: 'Ритуал' },
-  { href: '#auth', label: 'Вход' },
-  { href: '#cabinet', label: 'Кабинет' },
-  { href: '#support', label: 'Поддержка' },
+  { href: '/', label: 'Главная' },
+  { href: '/portal', label: 'Портал' },
+  { href: '/auth', label: 'Вход' },
+  { href: '/cabinet', label: 'Кабинет' },
+  { href: '/support', label: 'Поддержка' },
 ] as const;

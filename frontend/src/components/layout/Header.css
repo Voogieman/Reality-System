@@ -58,6 +58,11 @@
   background: rgba(201, 162, 39, 0.08);
 }
 
+.header-link--active {
+  color: var(--amber);
+  background: rgba(201, 162, 39, 0.18);
+}
+
 .header-user {
   color: var(--amber);
   cursor: pointer;

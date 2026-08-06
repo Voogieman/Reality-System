@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
-import { getGodById, SLAVIC_GODS } from '../../data/gods';
+import { DEFAULT_GOD, getGodById, SLAVIC_GODS } from '../../data/gods';
 import { realityApi } from '../../lib/api/reality.api';
 import type {
   OracleHistoryItem,
+  RitualModerationStatus,
   RitualHistoryItem,
   SupportTicketItem,
   SupportTicketStatus,
@@ -40,6 +42,39 @@ function oracleStatus(item: OracleHistoryItem): { label: string; tone: string } 
   return { label: 'Ожидает знамения', tone: 'wait' };
 }
 
+const RITUAL_STATUS_LABEL: Record<RitualModerationStatus, string> = {
+  submitted_for_review: 'Отправлен на проверку',
+  accepted_for_execution: 'Принят на реализацию',
+  rejected: 'Отклонён',
+  completed: 'Выполнен',
+};
+
+function ritualStatusLabel(item: RitualHistoryItem): string {
+  return RITUAL_STATUS_LABEL[item.moderationStatus] ?? 'Отправлен на проверку';
+}
+
+function resolveRitualGodId(item: RitualHistoryItem): string | null {
+  if (item.godId) {
+    return item.godId.trim().toLowerCase();
+  }
+
+  const result = item.result as Record<string, unknown>;
+  const resultGodId = result?.godId;
+  if (typeof resultGodId === 'string' && resultGodId.trim()) {
+    return resultGodId.trim().toLowerCase();
+  }
+
+  const resultGodName = result?.godName;
+  if (typeof resultGodName === 'string' && resultGodName.trim()) {
+    const byName = SLAVIC_GODS.find((god) => god.name.toLowerCase() === resultGodName.trim().toLowerCase());
+    if (byName) {
+      return byName.id;
+    }
+  }
+
+  return DEFAULT_GOD.id;
+}
+
 export function CabinetSection() {
   const { isAuthenticated, user, loading: authLoading } = useAuth();
   const [rituals, setRituals] = useState<RitualHistoryItem[]>([]);
@@ -49,7 +84,9 @@ export function CabinetSection() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const filteredRituals =
-    ritualGodFilter === 'all' ? rituals : rituals.filter((item) => item.godId === ritualGodFilter);
+    ritualGodFilter === 'all'
+      ? rituals
+      : rituals.filter((item) => resolveRitualGodId(item) === ritualGodFilter);
 
   const load = useCallback(async () => {
     if (!isAuthenticated) return;
@@ -94,9 +131,9 @@ export function CabinetSection() {
       >
         <div className="cabinet-gate panel-glass">
           <p>Кабинет доступен только посвящённым круга.</p>
-          <a href="#auth" className="btn-primary">
+          <Link to="/auth" className="btn-primary">
             Войти / Регистрация
-          </a>
+          </Link>
         </div>
       </Section>
     );
@@ -156,23 +193,27 @@ export function CabinetSection() {
             <p className="cabinet-empty">По выбранному богу ритуалов пока нет.</p>
           ) : (
             <ul className="cabinet-list">
-              {filteredRituals.map((item) => (
-                <li key={item.id} className="cabinet-item">
-                  <div className="cabinet-item-head">
-                    <strong>{item.ritualName}</strong>
-                    <span className={`status-pill ${item.success ? 'ok' : 'fail'}`}>
-                      {item.success ? 'Успех' : 'Провал'}
-                    </span>
-                  </div>
-                  <p className="cabinet-intention">
-                    Бог: {item.godId ? (getGodById(item.godId)?.name ?? item.godId) : 'не указан'}
-                  </p>
-                  <p>
-                    {item.person} · {item.location} · сила {item.intensity}
-                  </p>
-                  <time>{formatDate(item.createdAt)}</time>
-                </li>
-              ))}
+              {filteredRituals.map((item) => {
+                const ritualGodId = resolveRitualGodId(item);
+                return (
+                  <li key={item.id} className="cabinet-item">
+                    <div className="cabinet-item-head">
+                      <strong>{item.ritualName}</strong>
+                      <span className={`status-pill ${item.moderationStatus}`}>
+                        {ritualStatusLabel(item)}
+                      </span>
+                    </div>
+                    <p className="cabinet-intention">
+                      Бог: {ritualGodId ? (getGodById(ritualGodId)?.name ?? ritualGodId) : 'не указан'}
+                    </p>
+                    <p>
+                      {item.person} · {item.location} · сила {item.intensity}
+                    </p>
+                    {item.moderationReason && <p className="cabinet-reply">Причина: {item.moderationReason}</p>}
+                    <time>{formatDate(item.createdAt)}</time>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </article>
@@ -211,8 +252,7 @@ export function CabinetSection() {
           <h3 className="cabinet-card-title">Обращения к модератору</h3>
           {tickets.length === 0 ? (
             <p className="cabinet-empty">
-              Нет обращений в поддержку.{' '}
-              <a href="#support">Написать модератору</a>
+              Нет обращений в поддержку. <Link to="/support">Написать модератору</Link>
             </p>
           ) : (
             <ul className="cabinet-list">

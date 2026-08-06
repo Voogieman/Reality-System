@@ -1,106 +1,196 @@
-# Nest.js Microservices with RabbitMQ and Telegram
+# Magic13 / Slavic Reality Portal
 
-Проект реализует микросервисную архитектуру на Nest.js:
+Портал на `NestJS + React` с JWT-авторизацией, ИИ-оракулом, ритуалами, личным кабинетом и поддержкой.
 
-- `producer` — HTTP сервис для публикации событий в RabbitMQ
-- `consumer` — сервис обработки входящих событий с retry/ack логикой
-- `telegram` — сервис уведомлений через Telegram Bot API
+## Возможности
 
-## Архитектура
+- JWT auth: регистрация, подтверждение email, вход, выход, профиль.
+- Пантеон славянских богов и ИИ-оракул.
+- Ритуалы с сохранением истории и статусами.
+- Личный кабинет только для авторизованных пользователей.
+- Поддержка (тикеты модератору).
+- Swagger UI для тестирования API.
 
-Пайплайн событий:
+## Ритуалы и модерация
 
-1. Клиент отправляет событие в `producer` через `POST /events`
-2. `producer` присваивает событию UUID, сериализует в JSON и публикует в RabbitMQ через `confirm channel`
-3. `consumer` читает из очереди `events.processing`, обрабатывает и проксирует событие в очередь уведомлений
-4. `telegram` читает уведомления и отправляет сообщение в Telegram Bot API
+- Для обычных пользователей:
+  - ритуал отправляется на модерацию;
+  - окно проверки: `30-60` минут;
+  - статусы: `отправлен на проверку` → `принят на реализацию`/`отклонён` → `выполнен`.
+- Для администратора с email `vugarguliev333@gmail.com`:
+  - ритуал исполняется сразу, без модерации.
 
-### Clean Architecture
+## Стек
 
-Для микросервисного контура используется разделение на слои:
+- Backend: `NestJS`, `TypeORM`, `PostgreSQL`, `JWT`, `Swagger`.
+- Frontend: `React`, `Vite`, `TypeScript`, `react-router-dom`.
 
-- `application` — use-cases (бизнес-сценарии)
-- `application/ports` — интерфейсы зависимостей (контракты)
-- `infrastructure/adapters` — реализации портов (RabbitMQ, Telegram API)
-- `controllers` — входные HTTP точки
+## Быстрый старт
 
-### Надежность
-
-- Идемпотентность через `messageId = event.id (UUID)`
-- Подтверждение отправки через `waitForConfirms()`
-- Ретраи подключения к RabbitMQ
-- Ретраи обработки в `consumer` (через `x-retry-count`)
-- Финальный fallback в очередь `events.failed`
-- Логирование успешных и неуспешных обработок
-
-## Переменные окружения
-
-Скопируйте пример:
-
-```bash
-cp .env.example .env
-```
-
-Заполните значения:
-
-- `RABBITMQ_URL`
-- `PRODUCER_PORT`
-- `CONSUMER_MAX_RETRIES`
-- `TELEGRAM_BOT_TOKEN`
-- `TELEGRAM_CHAT_ID`
-
-## Локальный запуск (без Docker)
+### 1) Установка
 
 ```bash
 npm install
-npm run start:producer:dev
-npm run start:consumer:dev
-npm run start:telegram:dev
+npm install --prefix frontend
 ```
 
-Swagger для producer:
+### 2) Переменные окружения
 
-- `http://localhost:3001/docs`
-Swagger для consumer:
+Создайте `.env` на основе `.env.example`.
 
-- `http://localhost:3002/docs`
-Swagger для telegram:
+Минимум:
 
-- `http://localhost:3003/docs`
+- `PORT` (для Render и локального запуска, по умолчанию `3000`)
+- `JWT_SECRET`
+- `JWT_EXPIRES_IN`
+- `POSTGRES_HOST`
+- `POSTGRES_PORT`
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
+- `POSTGRES_DATABASE`
+- `OPENAI_API_KEY` (если нужен ИИ-оракул)
+- `OPENAI_BASE_URL` (опционально)
+- `OPENAI_MODEL` (опционально)
 
-Health-check endpoints:
+### 3) Запуск
 
-- Producer: `GET http://localhost:3001/health`
-- Consumer: `GET http://localhost:3002/health`
-- Telegram: `GET http://localhost:3003/health`
-
-Проверка отправки события:
+Backend:
 
 ```bash
-curl -X POST http://localhost:3001/events \
-  -H "Content-Type: application/json" \
-  -d "{\"type\":\"order.created\",\"payload\":{\"orderId\":123,\"total\":1500}}"
+npm run start:dev
 ```
 
-## Запуск через Docker
+Frontend:
 
 ```bash
-docker compose up --build
+npm run start:frontend
 ```
 
-Сервисы:
-
-- Producer: `http://localhost:3001`
-- RabbitMQ UI: `http://localhost:15672` (`guest/guest`)
-
-## Тесты
+## Проверки перед деплоем
 
 ```bash
+npm run lint
 npm run test
-npm run test:e2e
+npm run build
+npm run build:frontend
 ```
 
-Добавлены тесты:
+## Swagger / тестирование API
 
-- unit: создание события с UUID/timestamp и вызов publish-порта
-- e2e: полный поток `producer -> consumer -> telegram` через in-memory adapters
+После запуска backend:
+
+- Swagger UI: `http://localhost:3000/api`
+
+Быстрый сценарий теста в Swagger:
+
+1. `POST /reality/auth/register`
+2. `GET /reality/auth/confirm-email?token=...` (токен из ответа регистрации)
+3. `POST /reality/auth/login` → взять `accessToken`
+4. Нажать `Authorize` и вставить `Bearer <accessToken>`
+5. Проверить защищённые методы:
+   - `GET /reality/auth/me`
+   - `GET /reality/rituals/history`
+   - `GET /reality/oracle/history`
+   - `GET /reality/support`
+
+Основные endpoint-ы для ручного теста:
+
+- `GET /reality/gods`
+- `POST /reality/gods/oracle`
+- `GET /reality/rituals/types`
+- `POST /reality/rituals/perform`
+- `POST /reality/support`
+
+Подробная спецификация и примеры запросов: `docs/API.md`.
+
+## Структура проекта
+
+- `src/` — backend
+  - `src/reality` — API controller/service
+  - `src/rituals` — логика ритуалов
+  - `src/database` — TypeORM и сущности
+  - `src/auth` — JWT guard/strategy
+- `frontend/` — frontend
+  - `frontend/src/components`
+  - `frontend/src/lib/api`
+  - `frontend/src/data`
+
+## Изображения богов
+
+Папка: `frontend/src/assets/gods/`
+
+Поддерживаемые форматы:
+
+- `.png`, `.jpg`, `.jpeg`, `.webp`, `.avif`, `.gif`
+
+Имя файла:
+
+- по `id` бога (`veles.jpg`, `perun.webp`)
+- или по русскому имени (`велес.jpg`, `перун.webp`)
+
+Изображения подхватываются автоматически и плавно меняются в UI.
+
+## Deploy на Render
+
+Ниже минимально-рабочая схема: `PostgreSQL + Backend Web Service + Frontend Static Site`.
+
+### 1) PostgreSQL (Render Database)
+
+Создай PostgreSQL в Render и сохрани:
+
+- `host`
+- `port`
+- `database`
+- `user`
+- `password`
+
+### 2) Backend (Render Web Service)
+
+- **Environment**: `Node`
+- **Root Directory**: `/` (корень репозитория)
+- **Build Command**: `npm install && npm run build`
+- **Start Command**: `npm run start:prod`
+
+Environment Variables:
+
+- `NODE_ENV=production`
+- `JWT_SECRET=<strong_secret>`
+- `JWT_EXPIRES_IN=7d`
+- `APP_BASE_URL=https://<your-backend>.onrender.com`
+- `POSTGRES_HOST=<db-host>`
+- `POSTGRES_PORT=<db-port>`
+- `POSTGRES_USER=<db-user>`
+- `POSTGRES_PASSWORD=<db-password>`
+- `POSTGRES_DATABASE=<db-name>`
+- `OPENAI_API_KEY=<key>` (если нужен ИИ-оракул)
+- `OPENAI_BASE_URL=https://api.proxyapi.ru/openai/v1` (опционально)
+- `OPENAI_MODEL=gpt-4o-mini` (опционально)
+
+Swagger после деплоя:
+
+- `https://<your-backend>.onrender.com/api`
+
+### 3) Frontend (Render Static Site)
+
+- **Root Directory**: `frontend`
+- **Build Command**: `npm install && npm run build`
+- **Publish Directory**: `dist`
+
+Environment Variables:
+
+- `VITE_API_URL=https://<your-backend>.onrender.com`
+
+### 4) Smoke-test после деплоя
+
+1. Открыть Swagger: `https://<your-backend>.onrender.com/api`
+2. Пройти auth flow:
+   - `POST /reality/auth/register`
+   - `GET /reality/auth/confirm-email?token=...`
+   - `POST /reality/auth/login`
+   - `Authorize: Bearer <accessToken>`
+3. Проверить:
+   - `GET /reality/auth/me`
+   - `POST /reality/rituals/perform`
+   - `GET /reality/rituals/history`
+4. Открыть frontend URL и проверить вход, оракул, ритуалы, кабинет.
+

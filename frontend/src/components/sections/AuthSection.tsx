@@ -1,4 +1,5 @@
 import { type FormEvent, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import { useFormSubmit } from '../../hooks/useFormSubmit';
 import { FormResultBox } from '../ui/FormResult';
@@ -39,9 +40,9 @@ export function AuthSection() {
             Email: <strong>{user.email}</strong>
           </p>
           <div className="form-actions auth-actions">
-            <a href="#cabinet" className="btn-primary">
+            <Link to="/cabinet" className="btn-primary">
               Личный кабинет
-            </a>
+            </Link>
             <button
               type="button"
               className="btn-secondary"

@@ -1,4 +1,5 @@
 import type { SlavicGod } from '../../data/gods';
+import { Link } from 'react-router-dom';
 import './Hero.css';
 
 type Props = {
@@ -14,12 +15,12 @@ export function Hero({ selectedGod }: Props) {
         <p className="hero-subtitle">{selectedGod.domain}</p>
         <p className="hero-tagline">{selectedGod.description}</p>
         <div className="hero-actions">
-          <a href="#gods" className="btn-primary">
+          <Link to="/pantheon" className="btn-primary">
             Пантеон
-          </a>
-          <a href="#oracle" className="btn-secondary">
+          </Link>
+          <Link to="/oracle" className="btn-secondary">
             ИИ-оракул
-          </a>
+          </Link>
         </div>
         <div className="hero-realms">
           <span>Явь</span>

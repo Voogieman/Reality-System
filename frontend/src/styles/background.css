@@ -19,6 +19,26 @@
   transform: none;
   will-change: transform;
   backface-visibility: hidden;
+  transition: opacity 0.45s ease;
+}
+
+.app-bg-image--current {
+  opacity: 1;
+}
+
+.app-bg-image--next {
+  opacity: 1;
+  animation: fadeInBg 0.42s ease;
+}
+
+.app-bg-loader {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 35% 35%, rgba(255, 224, 138, 0.08), transparent 45%),
+    linear-gradient(120deg, rgba(201, 162, 39, 0.16), rgba(201, 162, 39, 0.02), rgba(201, 162, 39, 0.16));
+  animation: bgPulse 1.2s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .app-bg-overlay {
@@ -84,5 +104,29 @@
 @media (prefers-reduced-motion: reduce) {
   .app-bg-image {
     animation: none;
+  }
+  .app-bg-loader {
+    animation: none;
+  }
+}
+
+@keyframes fadeInBg {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes bgPulse {
+  0% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0.35;
   }
 }

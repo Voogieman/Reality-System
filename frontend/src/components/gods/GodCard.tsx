@@ -17,6 +17,10 @@ export function GodCard({ god, selected, onSelect }: Props) {
       onClick={() => onSelect(god)}
       style={{ '--god-accent': god.color } as CSSProperties}
     >
+      <span className="god-card-help" aria-label={`Описание ${god.name}`}>
+        ?
+        <span className="god-card-tooltip">{god.description}</span>
+      </span>
       <GodSymbol god={god} active={selected} />
       <h3 className="god-card-name">{god.name}</h3>
       <p className="god-card-title">{god.title}</p>

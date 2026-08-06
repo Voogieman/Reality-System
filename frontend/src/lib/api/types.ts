@@ -25,10 +25,16 @@ export type PerformRitualPayload = {
   godName: string;
   ritualType: string;
   person: string;
-  location: string;
-  intensity: number;
+  location?: string;
+  intensity?: number;
   invokerId?: string;
 };
+
+export type RitualModerationStatus =
+  | 'submitted_for_review'
+  | 'accepted_for_execution'
+  | 'rejected'
+  | 'completed';
 
 export type RegisterPayload = {
   email: string;
@@ -99,6 +105,11 @@ export type RitualHistoryItem = {
   person: string;
   location: string;
   intensity: number;
+  moderationStatus: RitualModerationStatus;
+  moderationEtaMinutes: number;
+  moderationReason: string | null;
+  moderatedAt: string | null;
+  completedAt: string | null;
   success: boolean;
   result: Record<string, unknown>;
   createdAt: string;

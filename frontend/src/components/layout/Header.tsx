@@ -1,32 +1,42 @@
-import { NAV_ITEMS } from '../../config/constants';
 import { useAuth } from '../../auth/AuthContext';
+import { NAV_ITEMS } from '../../config/constants';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { VelesSymbol } from '../brand/VelesSymbol';
 import './Header.css';
 
 export function Header() {
   const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
+  const visibleNavItems = NAV_ITEMS.filter((item) => (item.href === '/auth' ? !isAuthenticated : true));
 
   return (
     <header className="header">
       <div className="container header-inner">
-        <a href="#" className="header-logo">
+        <NavLink to="/" className="header-logo">
           <VelesSymbol size={36} className="header-logo-symbol" />
           <span className="header-title">Велес</span>
-        </a>
+        </NavLink>
         <nav className="header-nav">
-          {NAV_ITEMS.map((item) => (
-            <a key={item.href} href={item.href} className="header-link">
+          {visibleNavItems.map((item) => (
+            <NavLink
+              key={item.href}
+              to={item.href}
+              className={({ isActive }) => `header-link${isActive ? ' header-link--active' : ''}`}
+            >
               {item.label}
-            </a>
+            </NavLink>
           ))}
           {isAuthenticated && user ? (
             <button
               type="button"
               className="header-link header-user"
-              title={user.email}
-              onClick={() => void logout()}
+              title="Выйти"
+              onClick={async () => {
+                await logout();
+                navigate('/auth');
+              }}
             >
-              {user.displayName} · выход
+              Выход
             </button>
           ) : null}
         </nav>
@@ -34,3 +44,4 @@ export function Header() {
     </header>
   );
 }
+

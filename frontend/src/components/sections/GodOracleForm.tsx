@@ -1,4 +1,5 @@
 import { type FormEvent, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import { DEFAULT_USER_ID } from '../../config/constants';
 import type { SlavicGod } from '../../data/gods';
@@ -64,7 +65,7 @@ export function GodOracleForm({ selectedGod }: Props) {
             <label htmlFor="oracleUser">ID духа</label>
             <input id="oracleUser" value={userId} onChange={(e) => setUserId(e.target.value)} />
             <p className="oracle-auth-hint">
-              <a href="#auth">Войди</a>, чтобы история обращений сохранилась в кабинете.
+              <Link to="/auth">Войди</Link>, чтобы история обращений сохранилась в кабинете.
             </p>
           </div>
         )}
