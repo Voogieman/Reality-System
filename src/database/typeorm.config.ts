@@ -10,9 +10,16 @@ import {
 } from "./entities";
 
 export function buildTypeOrmConfig(): TypeOrmModuleOptions {
+  const host = process.env.POSTGRES_HOST ?? "127.0.0.1";
+  const sslExplicit = process.env.POSTGRES_SSL;
+  const useSsl =
+    typeof sslExplicit === "string"
+      ? sslExplicit === "true"
+      : process.env.NODE_ENV === "production" || host.includes("render.com");
+
   return {
     type: "postgres",
-    host: process.env.POSTGRES_HOST ?? "127.0.0.1",
+    host,
     port: Number(process.env.POSTGRES_PORT ?? 5432),
     username: process.env.POSTGRES_USER ?? "postgres",
     password: process.env.POSTGRES_PASSWORD ?? "postgres",
@@ -28,5 +35,6 @@ export function buildTypeOrmConfig(): TypeOrmModuleOptions {
     ],
     synchronize: process.env.TYPEORM_SYNCHRONIZE !== "false",
     logging: process.env.TYPEORM_LOGGING === "true",
+    ssl: useSsl ? { rejectUnauthorized: false } : false,
   };
 }
