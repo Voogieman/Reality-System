@@ -9,6 +9,7 @@ import { CabinetSection } from './components/sections/CabinetSection';
 import { GodOracleForm } from './components/sections/GodOracleForm';
 import { GodsGallery } from './components/sections/GodsGallery';
 import { Hero } from './components/sections/Hero';
+import { KnowledgeBaseSection } from './components/sections/KnowledgeBaseSection';
 import { RitualForm } from './components/sections/RitualForm';
 import { SupportSection } from './components/sections/SupportSection';
 import { DEFAULT_GOD, type SlavicGod } from './data/gods';
@@ -19,7 +20,9 @@ function PortalHome() {
     <section className="section">
       <div className="container">
         <h2 className="section-title">Портал практик</h2>
-        <p className="section-subtitle">Многофункциональный центр: пантеон, оракул, ритуалы, кабинет, поддержка</p>
+        <p className="section-subtitle">
+          Многофункциональный центр: пантеон, база знаний, оракул, ритуалы, кабинет, поддержка
+        </p>
         <div className="section-divider">ᛉ ◆ ᛉ</div>
         <div className="gods-grid">
           <Link className="god-card panel-glass" to="/pantheon">
@@ -29,6 +32,10 @@ function PortalHome() {
           <Link className="god-card panel-glass" to="/oracle">
             <h3 className="god-card-name">ИИ-Оракул</h3>
             <p className="god-card-domain">Пророчества и вопросы</p>
+          </Link>
+          <Link className="god-card panel-glass" to="/knowledge-base">
+            <h3 className="god-card-name">База знаний</h3>
+            <p className="god-card-domain">Карточки богов как энциклопедия</p>
           </Link>
           <Link className="god-card panel-glass" to="/rituals">
             <h3 className="god-card-name">Ритуалы</h3>
@@ -78,6 +85,10 @@ export default function App() {
           <Route
             path="/pantheon"
             element={<GodsGallery selectedGod={selectedGod} onSelectGod={handleSelectGod} />}
+          />
+          <Route
+            path="/knowledge-base"
+            element={<KnowledgeBaseSection selectedGod={selectedGod} onSelectGod={handleSelectGod} />}
           />
           <Route path="/oracle" element={<GodOracleForm selectedGod={selectedGod} />} />
           <Route
