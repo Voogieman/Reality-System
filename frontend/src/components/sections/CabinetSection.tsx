@@ -206,9 +206,7 @@ export function CabinetSection() {
                     <p className="cabinet-intention">
                       Бог: {ritualGodId ? (getGodById(ritualGodId)?.name ?? ritualGodId) : 'не указан'}
                     </p>
-                    <p>
-                      {item.person} · {item.location} · сила {item.intensity}
-                    </p>
+                    <p>{item.person} · сила {item.intensity}</p>
                     {item.moderationReason && <p className="cabinet-reply">Причина: {item.moderationReason}</p>}
                     <time>{formatDate(item.createdAt)}</time>
                   </li>
