@@ -25,11 +25,9 @@ const RANKING = [
   { name: 'ДМИТРИЙ ИВАНОВ', score: 7980, you: false },
   { name: 'ИВАН', score: 7650, you: false },
   { name: 'БОГДАН', score: 7210, you: false },
-  { name: 'АЛЕКСЕЙ', score: 6840, you: false },
+  { name: 'ВАХИД', score: 6840, you: false },
   { name: 'МАРИЯ', score: 6420, you: false },
   { name: 'СЕРГЕЙ', score: 5990, you: false },
-  { name: 'АННА', score: 5570, you: false },
-  { name: 'НИКИТА', score: 5120, you: false },
 ] as const;
 
 export function TamagotchiSection() {
@@ -156,8 +154,8 @@ export function TamagotchiSection() {
         </div>
       </div>
 
-      <aside className="tama-rating panel-glass" aria-label="Рейтинг игроков">
-        <p className="tama-rating-title">Рейтинг игроков</p>
+      <aside className="tama-rating panel-glass" aria-label="Топ 10 игроков">
+        <p className="tama-rating-title">Топ 10 игроков</p>
         <table className="tama-rating-table">
           <thead>
             <tr>
