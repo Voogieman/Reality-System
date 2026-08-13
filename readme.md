@@ -193,4 +193,3 @@ Environment Variables:
    - `POST /reality/rituals/perform`
    - `GET /reality/rituals/history`
 4. Открыть frontend URL и проверить вход, оракул, ритуалы, кабинет.
-

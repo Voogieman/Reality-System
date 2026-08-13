@@ -21,3 +21,194 @@
   color: var(--parchment);
   font-style: normal;
 }
+
+.support-letter-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 160;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.support-letter-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(6, 10, 14, 0.72);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+}
+
+.support-letter-stage {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 0.4rem;
+  animation: supportSceneIn 0.45s ease;
+}
+
+.support-courier {
+  width: min(320px, 86vw);
+  height: auto;
+  overflow: visible;
+}
+
+.support-courier-body {
+  transform-origin: 100px 178px;
+  animation: supportCourierIn 0.9s ease both, supportCourierBob 2.4s ease-in-out 0.9s infinite;
+}
+
+.support-wing {
+  transform-box: fill-box;
+  animation: supportWing 1.15s ease-in-out infinite;
+}
+
+.support-wing--left {
+  transform-origin: 100% 40%;
+}
+
+.support-wing--right {
+  transform-origin: 0% 40%;
+  animation-direction: reverse;
+}
+
+.support-courier-arm {
+  transform-box: fill-box;
+  transform-origin: 0% 0%;
+  animation: supportArm 1.5s ease-in-out infinite;
+}
+
+.support-courier-eyes {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: supportBlink 4s ease-in-out infinite;
+}
+
+.support-letter {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: supportLetterOffer 1.8s ease-in-out infinite;
+}
+
+.support-courier-shadow {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: supportShadow 2.4s ease-in-out infinite;
+}
+
+.support-letter-card {
+  max-width: 240px;
+  text-align: center;
+  padding: 0.7rem 0.85rem 0.8rem;
+  border: 1px solid rgba(201, 162, 39, 0.35);
+  background: linear-gradient(180deg, rgba(12, 18, 16, 0.94), rgba(8, 12, 14, 0.9));
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+}
+
+.support-letter-card h3 {
+  color: var(--amber);
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.support-letter-card p {
+  color: var(--parchment-dim);
+  font-size: 0.9rem;
+  margin-bottom: 0.7rem;
+}
+
+@keyframes supportSceneIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes supportCourierIn {
+  from {
+    opacity: 0;
+    transform: translateX(48px) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+}
+
+@keyframes supportCourierBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes supportWing {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-18deg);
+  }
+}
+
+@keyframes supportArm {
+  0%,
+  100% {
+    transform: rotate(-6deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+}
+
+@keyframes supportBlink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.08);
+  }
+}
+
+@keyframes supportLetterOffer {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(3deg);
+  }
+}
+
+@keyframes supportShadow {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scaleX(0.84);
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .support-courier-body,
+  .support-wing,
+  .support-courier-arm,
+  .support-courier-eyes,
+  .support-letter,
+  .support-courier-shadow {
+    animation: none;
+  }
+}

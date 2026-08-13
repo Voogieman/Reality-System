@@ -25,6 +25,24 @@
    - `POST /reality/support`
    - `GET /reality/support`
 
+## Endpoint Matrix
+
+| Группа | Метод | Endpoint | JWT |
+|---|---|---|---|
+| auth | POST | `/reality/auth/register` | нет |
+| auth | GET | `/reality/auth/confirm-email` | нет |
+| auth | POST | `/reality/auth/login` | нет |
+| auth | POST | `/reality/auth/logout` | да |
+| auth | GET | `/reality/auth/me` | да |
+| gods | GET | `/reality/gods` | нет |
+| gods | POST | `/reality/gods/oracle` | опционально |
+| gods | GET | `/reality/oracle/history` | да |
+| rituals | GET | `/reality/rituals/types` | нет |
+| rituals | POST | `/reality/rituals/perform` | опционально |
+| rituals | GET | `/reality/rituals/history` | да |
+| support | POST | `/reality/support` | опционально |
+| support | GET | `/reality/support` | да |
+
 ## Аутентификация
 
 ### POST `/reality/auth/register`
@@ -69,6 +87,12 @@
 ### GET `/reality/gods`
 
 Список богов для UI.
+
+Примечание:
+
+- список формируется из backend-констант;
+- в актуальном пантеоне есть `posvist` (Посвист) и другие боги;
+- всегда берите допустимые `godName` именно из этого endpoint-а перед тестами.
 
 ### POST `/reality/gods/oracle` (JWT optional)
 
@@ -156,6 +180,11 @@
 - `404` — сущность не найдена
 - `409` — конфликт (например, email уже существует)
 - `503` — временная недоступность зависимостей
+
+## Security Note
+
+- Никогда не публикуйте в docs реальные production credentials (`POSTGRES_PASSWORD`, full DB URL, tokens).
+- Для примеров используйте только плейсхолдеры вида `<db-password>`, `<access-token>`.
 
 ## Полезно перед деплоем
 

@@ -110,14 +110,14 @@ export class RealityController {
   @Post("gods/oracle")
   @ApiTags("gods")
   @ApiBearerAuth("JWT-auth")
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: "Пророчество бога (ИИ)",
     description:
-      "Ответ выбранного божества через LLM. JWT опционален: при наличии userId берётся из токена.",
+      "Ответ выбранного божества через LLM. Требуется JWT, userId берётся из токена.",
   })
   @ApiBody({ type: GodOracleDto })
-  async askOracle(@Body() dto: GodOracleDto, @CurrentUser() user?: AuthUser) {
+  async askOracle(@Body() dto: GodOracleDto, @CurrentUser() user: AuthUser) {
     return this.realityService.askOracle(dto, user);
   }
 
@@ -146,16 +146,16 @@ export class RealityController {
   @Post("rituals/perform")
   @ApiTags("rituals")
   @ApiBearerAuth("JWT-auth")
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: "Выполнение ритуала",
     description:
-      "Проведение магического ритуала с сохранением в историю. При JWT invokerId берётся из токена.",
+      "Проведение магического ритуала с сохранением в историю. Требуется JWT, invokerId берётся из токена.",
   })
   @ApiBody({ type: PerformRitualDto })
   async performRitual(
     @Body() ritualDto: PerformRitualDto,
-    @CurrentUser() user?: AuthUser
+    @CurrentUser() user: AuthUser
   ) {
     return this.realityService.performRitual(ritualDto, user);
   }

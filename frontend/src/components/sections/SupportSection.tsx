@@ -4,6 +4,7 @@ import { useFormSubmit } from '../../hooks/useFormSubmit';
 import { realityApi } from '../../lib/api/reality.api';
 import { FormResultBox } from '../ui/FormResult';
 import { Section } from '../ui/Section';
+import { SupportLetterAnimation } from './SupportLetterAnimation';
 import '../ui/Section.css';
 import './SupportSection.css';
 
@@ -14,6 +15,7 @@ export function SupportSection() {
   const [email, setEmail] = useState('');
   const [displayName, setDisplayName] = useState('');
   const { loading, result, submit } = useFormSubmit();
+  const [letterOpen, setLetterOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -38,7 +40,11 @@ export function SupportSection() {
         return response;
       },
       { successFallback: 'Обращение отправлено модератору' },
-    );
+    ).then((ok) => {
+      if (ok) {
+        setLetterOpen(true);
+      }
+    });
   };
 
   return (
@@ -111,6 +117,7 @@ export function SupportSection() {
         </div>
         <FormResultBox result={result} />
       </form>
+      <SupportLetterAnimation open={letterOpen} onClose={() => setLetterOpen(false)} />
     </Section>
   );
 }

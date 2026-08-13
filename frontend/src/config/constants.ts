@@ -12,6 +12,7 @@ export const RITUAL_TYPES = [
 export const NAV_ITEMS = [
   { href: '/', label: 'Главная' },
   { href: '/portal', label: 'Портал' },
+  { href: '/about', label: 'Об авторе' },
   { href: '/auth', label: 'Вход' },
   { href: '/cabinet', label: 'Кабинет' },
   { href: '/support', label: 'Поддержка' },

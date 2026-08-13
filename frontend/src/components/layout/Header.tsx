@@ -2,6 +2,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { NAV_ITEMS } from '../../config/constants';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { VelesSymbol } from '../brand/VelesSymbol';
+import { VolumeControl } from './VolumeControl';
 import './Header.css';
 
 export function Header() {
@@ -17,6 +18,7 @@ export function Header() {
           <span className="header-title">Велес</span>
         </NavLink>
         <nav className="header-nav">
+          <VolumeControl />
           {visibleNavItems.map((item) => (
             <NavLink
               key={item.href}

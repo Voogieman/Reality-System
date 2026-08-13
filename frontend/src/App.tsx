@@ -1,9 +1,10 @@
 import { type ReactElement, useState } from 'react';
-import { Navigate, Route, Routes, Link } from 'react-router-dom';
+import { Navigate, Route, Routes, Link, useLocation } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
 import { AppBackground } from './components/layout/AppBackground';
 import { Footer } from './components/layout/Footer';
 import { Header } from './components/layout/Header';
+import { AboutSection } from './components/sections/AboutSection';
 import { AuthSection } from './components/sections/AuthSection';
 import { CabinetSection } from './components/sections/CabinetSection';
 import { GodOracleForm } from './components/sections/GodOracleForm';
@@ -12,6 +13,7 @@ import { Hero } from './components/sections/Hero';
 import { KnowledgeBaseSection } from './components/sections/KnowledgeBaseSection';
 import { RitualForm } from './components/sections/RitualForm';
 import { SupportSection } from './components/sections/SupportSection';
+import { TamagotchiSection } from './components/sections/TamagotchiSection';
 import { DEFAULT_GOD, type SlavicGod } from './data/gods';
 import './components/ui/Section.css';
 
@@ -45,6 +47,10 @@ function PortalHome() {
             <h3 className="god-card-name">Кабинет</h3>
             <p className="god-card-domain">Статусы и история</p>
           </Link>
+          <Link className="god-card panel-glass" to="/tamagotchi">
+            <h3 className="god-card-name">Тамагочи</h3>
+            <p className="god-card-domain">Вырасти духа-хранителя</p>
+          </Link>
         </div>
       </div>
     </section>
@@ -57,7 +63,7 @@ function Protected({ children }: { children: ReactElement }) {
     return (
       <section className="section">
         <div className="container">
-          <p className="section-subtitle">Проверяю доступ к кабинету...</p>
+          <p className="section-subtitle">Проверяю доступ...</p>
         </div>
       </section>
     );
@@ -70,13 +76,15 @@ function Protected({ children }: { children: ReactElement }) {
 
 export default function App() {
   const [selectedGod, setSelectedGod] = useState<SlavicGod>(DEFAULT_GOD);
+  const location = useLocation();
+  const isAboutPage = location.pathname === '/about';
   const handleSelectGod = (god: SlavicGod) => {
     setSelectedGod(god);
   };
 
   return (
     <>
-      <AppBackground selectedGod={selectedGod} />
+      {isAboutPage ? null : <AppBackground selectedGod={selectedGod} />}
       <Header />
       <main className="app-main">
         <Routes>
@@ -90,10 +98,21 @@ export default function App() {
             path="/knowledge-base"
             element={<KnowledgeBaseSection selectedGod={selectedGod} onSelectGod={handleSelectGod} />}
           />
-          <Route path="/oracle" element={<GodOracleForm selectedGod={selectedGod} />} />
+          <Route
+            path="/oracle"
+            element={
+              <Protected>
+                <GodOracleForm selectedGod={selectedGod} />
+              </Protected>
+            }
+          />
           <Route
             path="/rituals"
-            element={<RitualForm selectedGod={selectedGod} onSelectGod={handleSelectGod} />}
+            element={
+              <Protected>
+                <RitualForm selectedGod={selectedGod} onSelectGod={handleSelectGod} />
+              </Protected>
+            }
           />
           <Route path="/auth" element={<AuthSection />} />
           <Route
@@ -104,6 +123,8 @@ export default function App() {
               </Protected>
             }
           />
+          <Route path="/about" element={<AboutSection />} />
+          <Route path="/tamagotchi" element={<TamagotchiSection />} />
           <Route path="/support" element={<SupportSection />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

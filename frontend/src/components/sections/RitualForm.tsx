@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../auth/AuthContext';
-import { DEFAULT_USER_ID, RITUAL_TYPES } from '../../config/constants';
+import { RITUAL_TYPES } from '../../config/constants';
 import { DEFAULT_GOD, SLAVIC_GODS, type SlavicGod } from '../../data/gods';
 import { realityApi } from '../../lib/api/reality.api';
 import type { FormResult } from '../../lib/api/types';
@@ -23,12 +23,11 @@ type ModalState = {
 };
 
 export function RitualForm({ selectedGod, onSelectGod }: Props) {
-  const { isAuthenticated, user } = useAuth();
+  const { user } = useAuth();
   const isAdmin = user?.email?.toLowerCase() === 'vugarguliev333@gmail.com';
   const [godName, setGodName] = useState(selectedGod.apiGodName || DEFAULT_GOD.apiGodName);
   const [ritualType, setRitualType] = useState('blessing');
   const [person, setPerson] = useState('');
-  const [invokerId, setInvokerId] = useState(DEFAULT_USER_ID);
   const [loading, setLoading] = useState(false);
   const [adminRitualFx, setAdminRitualFx] = useState(false);
   const [result, setResult] = useState<FormResult | null>(null);
@@ -39,12 +38,6 @@ export function RitualForm({ selectedGod, onSelectGod }: Props) {
     text: 'Инициализируем ритуальный контур...',
   });
   const intervalRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (user?.id) {
-      setInvokerId(user.id);
-    }
-  }, [user]);
 
   useEffect(() => {
     setGodName(selectedGod.apiGodName);
@@ -85,7 +78,7 @@ export function RitualForm({ selectedGod, onSelectGod }: Props) {
         godName,
         ritualType,
         person,
-        invokerId: isAuthenticated && user ? user.id : invokerId,
+        invokerId: user?.id,
       });
 
       if (!isAdmin) {
@@ -186,17 +179,11 @@ export function RitualForm({ selectedGod, onSelectGod }: Props) {
               />
             </div>
           </div>
-          {!isAuthenticated && (
-            <div className="form-group">
-              <label htmlFor="invokerId">ID заклинателя</label>
-              <input id="invokerId" value={invokerId} onChange={(e) => setInvokerId(e.target.value)} required />
-            </div>
-          )}
-          {isAuthenticated && user && (
+          {user ? (
             <p className="ritual-auth-hint">
               Интенсивность зафиксирована на 76, место силы назначается автоматически.
             </p>
-          )}
+          ) : null}
           <div className="form-actions">
             <button type="submit" className={`btn-primary${loading ? ' ritual-btn-pulse' : ''}`} disabled={loading}>
               {loading ? 'Отправляю на модерацию...' : 'Совершить ритуал'}
