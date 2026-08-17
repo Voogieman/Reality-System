@@ -13,7 +13,7 @@ export function Header() {
   return (
     <header className="header">
       <div className="container header-inner">
-        <NavLink to="/" className="header-logo">
+        <NavLink to="/" end className="header-logo">
           <VelesSymbol size={36} className="header-logo-symbol" />
           <span className="header-title">Велес</span>
         </NavLink>
@@ -23,6 +23,7 @@ export function Header() {
             <NavLink
               key={item.href}
               to={item.href}
+              end={item.href === '/'}
               className={({ isActive }) => `header-link${isActive ? ' header-link--active' : ''}`}
             >
               {item.label}

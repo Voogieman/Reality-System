@@ -1,12 +1,14 @@
 import "dotenv/config";
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
+import { NestExpressApplication } from "@nestjs/platform-express";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import { RealityModule } from "./reality/reality.module";
 import { SlavicExceptionFilter } from "./common/filters/slavic-exception.filter";
+import { mountFrontendSpa } from "./spa";
 
 async function bootstrap() {
-  const app = await NestFactory.create(RealityModule);
+  const app = await NestFactory.create<NestExpressApplication>(RealityModule);
   const configuredAppBaseUrl = process.env.APP_BASE_URL?.trim();
 
   app.enableCors({
@@ -73,6 +75,8 @@ async function bootstrap() {
       persistAuthorization: true,
     },
   });
+
+  mountFrontendSpa(app);
 
   const port = Number(process.env.PORT ?? 3000);
   await app.listen(port);

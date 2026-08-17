@@ -11,6 +11,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    appType: 'spa',
     server: {
       port: 5173,
       proxy: {
