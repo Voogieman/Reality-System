@@ -8,14 +8,23 @@ type Props = {
   children: ReactNode;
   closeText?: string;
   lockClose?: boolean;
+  className?: string;
 };
 
-export function Modal({ open, title, onClose, children, closeText = 'Закрыть', lockClose = false }: Props) {
+export function Modal({
+  open,
+  title,
+  onClose,
+  children,
+  closeText = 'Закрыть',
+  lockClose = false,
+  className = '',
+}: Props) {
   if (!open) return null;
 
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label={title}>
-      <div className="modal-box panel-glass">
+      <div className={`modal-box panel-glass${className ? ` ${className}` : ''}`}>
         <div className="modal-head">
           <h3>{title}</h3>
           {!lockClose && (
