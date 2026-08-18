@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import { DEFAULT_GOD, getGodById, SLAVIC_GODS } from '../../data/gods';
 import { realityApi } from '../../lib/api/reality.api';
+import { useLanding } from '../../landing/LandingContext';
 import type {
   OracleHistoryItem,
   RitualModerationStatus,
@@ -77,6 +77,7 @@ function resolveRitualGodId(item: RitualHistoryItem): string | null {
 
 export function CabinetSection() {
   const { isAuthenticated, user, loading: authLoading } = useAuth();
+  const { openSection } = useLanding();
   const [rituals, setRituals] = useState<RitualHistoryItem[]>([]);
   const [ritualGodFilter, setRitualGodFilter] = useState<string>('all');
   const [oracles, setOracles] = useState<OracleHistoryItem[]>([]);
@@ -131,9 +132,9 @@ export function CabinetSection() {
       >
         <div className="cabinet-gate panel-glass">
           <p>Кабинет доступен только посвящённым круга.</p>
-          <Link to="/auth" className="btn-primary">
+          <button type="button" className="btn-primary" onClick={() => openSection('auth')}>
             Войти / Регистрация
-          </Link>
+          </button>
         </div>
       </Section>
     );
@@ -250,7 +251,10 @@ export function CabinetSection() {
           <h3 className="cabinet-card-title">Обращения к модератору</h3>
           {tickets.length === 0 ? (
             <p className="cabinet-empty">
-              Нет обращений в поддержку. <Link to="/support">Написать модератору</Link>
+              Нет обращений в поддержку.{' '}
+              <button type="button" className="cabinet-inline-link" onClick={() => openSection('support')}>
+                Написать модератору
+              </button>
             </p>
           ) : (
             <ul className="cabinet-list">

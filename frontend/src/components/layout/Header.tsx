@@ -1,33 +1,35 @@
 import { useAuth } from '../../auth/AuthContext';
-import { NAV_ITEMS } from '../../config/constants';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useLanding, type LandingSection } from '../../landing/LandingContext';
 import { VelesSymbol } from '../brand/VelesSymbol';
-import { VolumeControl } from './VolumeControl';
 import './Header.css';
+
+const NAV_ITEMS: { id: LandingSection; label: string; guestOnly?: boolean }[] = [
+  { id: 'auth', label: 'Вход', guestOnly: true },
+  { id: 'support', label: 'Поддержка' },
+];
 
 export function Header() {
   const { isAuthenticated, user, logout } = useAuth();
-  const navigate = useNavigate();
-  const visibleNavItems = NAV_ITEMS.filter((item) => (item.href === '/auth' ? !isAuthenticated : true));
+  const { active, openSection, closeSection } = useLanding();
+  const visibleNavItems = NAV_ITEMS.filter((item) => (item.guestOnly ? !isAuthenticated : true));
 
   return (
     <header className="header">
       <div className="container header-inner">
-        <NavLink to="/" end className="header-logo">
+        <button type="button" className="header-logo" onClick={closeSection}>
           <VelesSymbol size={36} className="header-logo-symbol" />
           <span className="header-title">Велес</span>
-        </NavLink>
+        </button>
         <nav className="header-nav">
-          <VolumeControl />
           {visibleNavItems.map((item) => (
-            <NavLink
-              key={item.href}
-              to={item.href}
-              end={item.href === '/'}
-              className={({ isActive }) => `header-link${isActive ? ' header-link--active' : ''}`}
+            <button
+              key={item.id}
+              type="button"
+              className={`header-link${active === item.id ? ' header-link--active' : ''}`}
+              onClick={() => openSection(item.id)}
             >
               {item.label}
-            </NavLink>
+            </button>
           ))}
           {isAuthenticated && user ? (
             <button
@@ -36,7 +38,7 @@ export function Header() {
               title="Выйти"
               onClick={async () => {
                 await logout();
-                navigate('/auth');
+                openSection('auth');
               }}
             >
               Выход
@@ -47,4 +49,3 @@ export function Header() {
     </header>
   );
 }
-

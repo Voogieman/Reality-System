@@ -23,7 +23,7 @@ export function GodsGallery({ selectedGod, onSelectGod }: Props) {
     <Section
       id="gods"
       title="Пантеон"
-      subtitle={`${SLAVIC_GODS.length} божеств славянской традиции — выбери покровителя`}
+      subtitle="Выбери божество — образ на фоне сменится"
       divider="ᛉ ◆ ᛉ"
     >
       <div className="gods-toolbar panel-glass">

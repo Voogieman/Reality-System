@@ -225,3 +225,14 @@
     min-width: 0;
   }
 }
+
+.cabinet-inline-link {
+  display: inline;
+  padding: 0;
+  color: var(--amber);
+  background: none;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}

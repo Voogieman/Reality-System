@@ -1,5 +1,4 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
 
 type Props = {
   children: ReactNode;
@@ -27,11 +26,11 @@ export class ErrorBoundary extends Component<Props, State> {
       <section className="section">
         <div className="container">
           <h2 className="section-title">Страница не открылась</h2>
-          <p className="section-subtitle">Вернись на главную и продолжи путь по порталу.</p>
+          <p className="section-subtitle">Обнови портал и продолжи путь.</p>
           <div className="form-actions">
-            <Link className="btn-primary" to="/" onClick={() => this.setState({ hasError: false })}>
-              На главную
-            </Link>
+            <button type="button" className="btn-primary" onClick={() => this.setState({ hasError: false })}>
+              Продолжить
+            </button>
           </div>
         </div>
       </section>

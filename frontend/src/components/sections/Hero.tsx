@@ -1,10 +1,13 @@
 import type { SlavicGod } from '../../data/gods';
-import { Link } from 'react-router-dom';
 import './Hero.css';
 
 type Props = {
   selectedGod: SlavicGod;
 };
+
+function scrollToSection(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 export function Hero({ selectedGod }: Props) {
   return (
@@ -15,12 +18,12 @@ export function Hero({ selectedGod }: Props) {
         <p className="hero-subtitle">{selectedGod.domain}</p>
         <p className="hero-tagline">{selectedGod.description}</p>
         <div className="hero-actions">
-          <Link to="/pantheon" className="btn-primary">
+          <button type="button" className="btn-primary" onClick={() => scrollToSection('gods')}>
             Пантеон
-          </Link>
-          <Link to="/oracle" className="btn-secondary">
+          </button>
+          <button type="button" className="btn-secondary" onClick={() => scrollToSection('oracle')}>
             ИИ-оракул
-          </Link>
+          </button>
         </div>
         <div className="hero-realms">
           <span>Явь</span>

@@ -1,7 +1,7 @@
 import { type FormEvent, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import { useFormSubmit } from '../../hooks/useFormSubmit';
+import { useLanding } from '../../landing/LandingContext';
 import { FormResultBox } from '../ui/FormResult';
 import { Section } from '../ui/Section';
 import '../ui/Section.css';
@@ -11,6 +11,7 @@ type Mode = 'login' | 'register';
 
 export function AuthSection() {
   const { isAuthenticated, user, login, register, confirmEmail, logout } = useAuth();
+  const { openSection } = useLanding();
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -21,7 +22,7 @@ export function AuthSection() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
-    if (token && window.location.pathname.includes('confirm')) {
+    if (token) {
       setConfirmToken(token);
     }
   }, []);
@@ -40,9 +41,9 @@ export function AuthSection() {
             Email: <strong>{user.email}</strong>
           </p>
           <div className="form-actions auth-actions">
-            <Link to="/cabinet" className="btn-primary">
+            <button type="button" className="btn-primary" onClick={() => openSection('cabinet')}>
               Личный кабинет
-            </Link>
+            </button>
             <button
               type="button"
               className="btn-secondary"
@@ -114,7 +115,6 @@ export function AuthSection() {
       id="auth"
       className="auth-section"
       title="Вход и регистрация"
-      subtitle="Получи JWT и войди в круг Велеса"
       divider="ᛉ ◆ ᛉ"
     >
       <div className="auth-panel panel-glass">

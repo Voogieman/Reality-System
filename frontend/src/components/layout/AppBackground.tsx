@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import type { SlavicGod } from '../../data/gods';
-import { getGodImageByGod } from '../../data/god-images';
+import { getGodImageByGod, getGodImageFrame, type GodImageFrame } from '../../data/god-images';
 
 type Props = {
   selectedGod: SlavicGod;
@@ -11,6 +11,17 @@ export function AppBackground({ selectedGod }: Props) {
   const [currentSrc, setCurrentSrc] = useState(targetSrc);
   const [nextSrc, setNextSrc] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [frame, setFrame] = useState<GodImageFrame>(() => getGodImageFrame(selectedGod));
+
+  useEffect(() => {
+    setFrame(getGodImageFrame(selectedGod));
+    const image = new Image();
+    image.onload = () => {
+      const ratio = image.naturalWidth / Math.max(1, image.naturalHeight);
+      setFrame(getGodImageFrame(selectedGod, ratio));
+    };
+    image.src = targetSrc;
+  }, [selectedGod, targetSrc]);
 
   useEffect(() => {
     if (targetSrc === currentSrc) return;
@@ -34,7 +45,14 @@ export function AppBackground({ selectedGod }: Props) {
   }, [currentSrc, targetSrc]);
 
   return (
-    <div className="app-bg" aria-hidden="true">
+    <div
+      className={`app-bg app-bg--${frame.fit}`}
+      aria-hidden="true"
+      style={{ '--bg-pos': frame.position } as CSSProperties}
+    >
+      {frame.fit === 'contain' ? (
+        <img className="app-bg-fill" src={currentSrc} alt="" decoding="async" />
+      ) : null}
       <img
         className="app-bg-image app-bg-image--current"
         src={currentSrc}

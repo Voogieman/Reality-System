@@ -2,6 +2,7 @@ import { type FormEvent, useState } from 'react';
 import { useAuth } from '../../auth/AuthContext';
 import type { SlavicGod } from '../../data/gods';
 import { useFormSubmit } from '../../hooks/useFormSubmit';
+import { useLanding } from '../../landing/LandingContext';
 import { realityApi } from '../../lib/api/reality.api';
 import { FormResultBox } from '../ui/FormResult';
 import { Section } from '../ui/Section';
@@ -33,13 +34,18 @@ type Props = {
 };
 
 export function GodOracleForm({ selectedGod }: Props) {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const { openSection } = useLanding();
   const [intention, setIntention] = useState('что готовит мне судьба в ближайший год?');
   const [answerCount, setAnswerCount] = useState(readOracleCount);
   const { loading, result, submit } = useFormSubmit();
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      openSection('auth');
+      return;
+    }
     if (readOracleCount() >= ORACLE_LIMIT) {
       window.alert('оплатите тариф');
       setAnswerCount(ORACLE_LIMIT);
@@ -81,9 +87,11 @@ export function GodOracleForm({ selectedGod }: Props) {
           <label htmlFor="oracleGod">Божество</label>
           <input id="oracleGod" value={selectedGod.name} readOnly />
         </div>
-        {user ? (
+        {isAuthenticated && user ? (
           <p className="oracle-auth-hint">Обращение запишется для {user.displayName}.</p>
-        ) : null}
+        ) : (
+          <p className="oracle-auth-hint">Пророчество доступно после входа или регистрации.</p>
+        )}
         <div className="form-group">
           <label htmlFor="oracleQuestion">Вопрос или намерение</label>
           <textarea
