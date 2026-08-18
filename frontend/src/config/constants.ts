@@ -1,8 +1,4 @@
-export const RITUAL_TYPES = [
-  { value: 'purification', label: 'Очищение' },
-  { value: 'blessing', label: 'Благословение' },
-  { value: 'consecration', label: 'Освящение' },
-  { value: 'weaving', label: 'Плетение судьбы' },
-  { value: 'coition', label: 'Единение' },
-  { value: 'offer', label: 'Подношение' },
-] as const;
+export const BLESSING_RITUAL = {
+  value: 'blessing',
+  label: 'Благословение',
+} as const;

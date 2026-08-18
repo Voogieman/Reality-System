@@ -7,6 +7,8 @@ import { CabinetSection } from './components/sections/CabinetSection';
 import { GodOracleForm } from './components/sections/GodOracleForm';
 import { GodsGallery } from './components/sections/GodsGallery';
 import { Hero } from './components/sections/Hero';
+import { KnowledgeBaseSection } from './components/sections/KnowledgeBaseSection';
+import { RitualForm } from './components/sections/RitualForm';
 import { SupportSection } from './components/sections/SupportSection';
 import { DEFAULT_GOD, type SlavicGod } from './data/gods';
 import { useLanding, type LandingSection } from './landing/LandingContext';
@@ -37,14 +39,24 @@ export default function App() {
         <Hero selectedGod={selectedGod} />
         <div className="landing-promo">
           <GodsGallery selectedGod={selectedGod} onSelectGod={setSelectedGod} />
+          <KnowledgeBaseSection
+            selectedGod={selectedGod}
+            onSelectGod={setSelectedGod}
+            sectionId="knowledge-base"
+          />
           <GodOracleForm selectedGod={selectedGod} />
+          <RitualForm selectedGod={selectedGod} onSelectGod={setSelectedGod} sectionId="ritual" />
         </div>
       </main>
       <Footer />
 
       <SectionOverlay open={Boolean(active)} title={active ? SECTION_TITLES[active] : ''} onClose={closeSection}>
         {active === 'auth' ? <AuthSection /> : null}
+        {active === 'knowledge' ? (
+          <KnowledgeBaseSection selectedGod={selectedGod} onSelectGod={setSelectedGod} />
+        ) : null}
         {active === 'cabinet' ? <CabinetSection /> : null}
+        {active === 'rituals' ? <RitualForm selectedGod={selectedGod} onSelectGod={setSelectedGod} /> : null}
         {active === 'support' ? <SupportSection /> : null}
       </SectionOverlay>
     </>

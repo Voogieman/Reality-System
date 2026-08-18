@@ -5,7 +5,9 @@ import './Header.css';
 
 const NAV_ITEMS: { id: LandingSection; label: string; guestOnly?: boolean; authOnly?: boolean }[] = [
   { id: 'auth', label: 'Вход', guestOnly: true },
+  { id: 'knowledge', label: 'База знаний' },
   { id: 'cabinet', label: 'Личный кабинет', authOnly: true },
+  { id: 'rituals', label: 'Ритуалы', authOnly: true },
   { id: 'support', label: 'Поддержка' },
 ];
 

@@ -244,7 +244,9 @@ input, select, textarea {
 }
 
 #gods,
-#oracle {
+#knowledge-base,
+#oracle,
+#ritual {
   scroll-margin-top: 5rem;
 }
 

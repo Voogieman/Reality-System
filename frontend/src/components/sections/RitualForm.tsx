@@ -1,7 +1,8 @@
 import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../auth/AuthContext';
-import { RITUAL_TYPES } from '../../config/constants';
+import { BLESSING_RITUAL } from '../../config/constants';
 import { DEFAULT_GOD, SLAVIC_GODS, type SlavicGod } from '../../data/gods';
+import { useLanding } from '../../landing/LandingContext';
 import { realityApi } from '../../lib/api/reality.api';
 import type { FormResult } from '../../lib/api/types';
 import { FormResultBox } from '../ui/FormResult';
@@ -13,6 +14,7 @@ import './RitualForm.css';
 type Props = {
   selectedGod: SlavicGod;
   onSelectGod: (god: SlavicGod) => void;
+  sectionId?: string;
 };
 
 type ModalState = {
@@ -22,11 +24,11 @@ type ModalState = {
   text: string;
 };
 
-export function RitualForm({ selectedGod, onSelectGod }: Props) {
-  const { user } = useAuth();
+export function RitualForm({ selectedGod, onSelectGod, sectionId }: Props) {
+  const { user, isAuthenticated } = useAuth();
+  const { openSection } = useLanding();
   const isAdmin = user?.email?.toLowerCase() === 'vugarguliev333@gmail.com';
   const [godName, setGodName] = useState(selectedGod.apiGodName || DEFAULT_GOD.apiGodName);
-  const [ritualType, setRitualType] = useState('blessing');
   const [person, setPerson] = useState('');
   const [loading, setLoading] = useState(false);
   const [adminRitualFx, setAdminRitualFx] = useState(false);
@@ -54,6 +56,10 @@ export function RitualForm({ selectedGod, onSelectGod }: Props) {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      openSection('rituals');
+      return;
+    }
     setLoading(true);
     setResult(null);
     if (isAdmin) {
@@ -76,7 +82,7 @@ export function RitualForm({ selectedGod, onSelectGod }: Props) {
     try {
       const response = await realityApi.performRitual({
         godName,
-        ritualType,
+        ritualType: BLESSING_RITUAL.value,
         person,
         invokerId: user?.id,
       });
@@ -127,7 +133,7 @@ export function RitualForm({ selectedGod, onSelectGod }: Props) {
   return (
     <>
       <Section
-        id="ritual"
+        id={sectionId}
         className="ritual-section"
         title="Магический Ритуал"
         subtitle="Ритуал отправляется на модерацию и проходит 30-60 минут проверки"
@@ -158,13 +164,7 @@ export function RitualForm({ selectedGod, onSelectGod }: Props) {
             </div>
             <div className="form-group">
               <label htmlFor="ritualType">Тип ритуала</label>
-              <select id="ritualType" value={ritualType} onChange={(e) => setRitualType(e.target.value)}>
-                {RITUAL_TYPES.map((r) => (
-                  <option key={r.value} value={r.value}>
-                    {r.label}
-                  </option>
-                ))}
-              </select>
+              <input id="ritualType" value={BLESSING_RITUAL.label} readOnly />
             </div>
           </div>
           <div className="form-row">
@@ -179,14 +179,16 @@ export function RitualForm({ selectedGod, onSelectGod }: Props) {
               />
             </div>
           </div>
-          {user ? (
+          {isAuthenticated && user ? (
             <p className="ritual-auth-hint">
               Интенсивность зафиксирована на 76, место силы назначается автоматически.
             </p>
-          ) : null}
+          ) : (
+            <p className="ritual-auth-hint">Выполнение ритуала доступно после входа или регистрации.</p>
+          )}
           <div className="form-actions">
             <button type="submit" className={`btn-primary${loading ? ' ritual-btn-pulse' : ''}`} disabled={loading}>
-              {loading ? 'Отправляю на модерацию...' : 'Совершить ритуал'}
+              {loading ? 'Отправляю на модерацию...' : 'Выполнить ритуал'}
             </button>
           </div>
           <FormResultBox result={result} />

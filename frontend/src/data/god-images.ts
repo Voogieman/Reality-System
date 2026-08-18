@@ -41,6 +41,7 @@ const GOD_IMAGE_FRAME: Record<string, GodImageFrame> = {
   svarog: { fit: 'contain', position: 'center 10%' },
   vyshen: { fit: 'contain', position: 'center 8%' },
   posvist: { fit: 'contain', position: 'center 14%' },
+  yaginya: { fit: 'contain', position: 'center 12%' },
 };
 
 export function frameFromRatio(ratio: number): GodImageFrame {

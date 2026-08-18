@@ -21,8 +21,14 @@ export function Hero({ selectedGod }: Props) {
           <button type="button" className="btn-primary" onClick={() => scrollToSection('gods')}>
             Пантеон
           </button>
+          <button type="button" className="btn-secondary" onClick={() => scrollToSection('knowledge-base')}>
+            База знаний
+          </button>
           <button type="button" className="btn-secondary" onClick={() => scrollToSection('oracle')}>
             ИИ-оракул
+          </button>
+          <button type="button" className="btn-secondary" onClick={() => scrollToSection('ritual')}>
+            Ритуалы
           </button>
         </div>
         <div className="hero-realms">
