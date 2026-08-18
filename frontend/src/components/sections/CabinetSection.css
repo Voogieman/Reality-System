@@ -144,6 +144,7 @@
   padding: 0.65rem 0.75rem;
   background: rgba(201, 162, 39, 0.08);
   border-left: 2px solid rgba(201, 162, 39, 0.45);
+  white-space: pre-wrap;
 }
 
 .cabinet-empty {

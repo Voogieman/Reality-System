@@ -3,15 +3,20 @@ import { useLanding, type LandingSection } from '../../landing/LandingContext';
 import { VelesSymbol } from '../brand/VelesSymbol';
 import './Header.css';
 
-const NAV_ITEMS: { id: LandingSection; label: string; guestOnly?: boolean }[] = [
+const NAV_ITEMS: { id: LandingSection; label: string; guestOnly?: boolean; authOnly?: boolean }[] = [
   { id: 'auth', label: 'Вход', guestOnly: true },
+  { id: 'cabinet', label: 'Личный кабинет', authOnly: true },
   { id: 'support', label: 'Поддержка' },
 ];
 
 export function Header() {
   const { isAuthenticated, user, logout } = useAuth();
   const { active, openSection, closeSection } = useLanding();
-  const visibleNavItems = NAV_ITEMS.filter((item) => (item.guestOnly ? !isAuthenticated : true));
+  const visibleNavItems = NAV_ITEMS.filter((item) => {
+    if (item.guestOnly) return !isAuthenticated;
+    if (item.authOnly) return isAuthenticated;
+    return true;
+  });
 
   return (
     <header className="header">

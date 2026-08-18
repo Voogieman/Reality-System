@@ -21,7 +21,7 @@ const SECTION_TITLES: Record<LandingSection, string> = {
   oracle: 'ИИ-Оракул',
   rituals: 'Ритуалы',
   auth: 'Вход',
-  cabinet: 'Кабинет',
+  cabinet: 'Личный кабинет',
   support: 'Поддержка',
 };
 

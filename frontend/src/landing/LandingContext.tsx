@@ -43,10 +43,16 @@ export function LandingProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated || !pending) return;
-    setActive(pending);
-    setPending(null);
-  }, [isAuthenticated, pending]);
+    if (!isAuthenticated) return;
+    if (pending) {
+      setActive(pending);
+      setPending(null);
+      return;
+    }
+    if (active === 'auth') {
+      setActive('cabinet');
+    }
+  }, [isAuthenticated, pending, active]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

@@ -171,7 +171,7 @@ export function CabinetSection() {
       <div className="cabinet-grid">
         <article className="cabinet-card panel-glass">
           <div className="cabinet-card-head">
-            <h3 className="cabinet-card-title">Мои ритуалы</h3>
+            <h3 className="cabinet-card-title">История ритуалов</h3>
             <div className="cabinet-filter">
               <label htmlFor="cabinetRitualGodFilter">Бог</label>
               <select
@@ -218,7 +218,7 @@ export function CabinetSection() {
         </article>
 
         <article className="cabinet-card panel-glass">
-          <h3 className="cabinet-card-title">Обращения к оракулу</h3>
+          <h3 className="cabinet-card-title">История диалогов с ИИ-оракулом</h3>
           {oracles.length === 0 ? (
             <p className="cabinet-empty">Ещё не было вопросов богам.</p>
           ) : (
@@ -232,13 +232,10 @@ export function CabinetSection() {
                       <strong>{god?.name ?? item.godId}</strong>
                       <span className={`status-pill ${status.tone}`}>{status.label}</span>
                     </div>
-                    <p className="cabinet-intention">{item.intention}</p>
-                    {item.prophecy && (
-                      <p className="cabinet-prophecy">
-                        {item.prophecy.slice(0, 180)}
-                        {item.prophecy.length > 180 ? '…' : ''}
-                      </p>
-                    )}
+                    <p className="cabinet-intention">Ты: {item.intention}</p>
+                    {item.prophecy ? (
+                      <p className="cabinet-prophecy">Оракул: {item.prophecy}</p>
+                    ) : null}
                     <time>{formatDate(item.createdAt)}</time>
                   </li>
                 );
