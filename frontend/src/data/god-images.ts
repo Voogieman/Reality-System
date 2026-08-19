@@ -24,6 +24,23 @@ const godImageByKey = Object.entries(godImageModules).reduce<Record<string, stri
   return acc;
 }, {});
 
+const GOD_IMAGE_ALIASES: Record<string, string[]> = {
+  zorya: ['заря', 'зоря', 'zarya'],
+  yaginya: ['ягиня', 'яга'],
+  belobog: ['белобог'],
+};
+
+function keysForGod(god: SlavicGod): string[] {
+  return [god.id, god.name, ...(GOD_IMAGE_ALIASES[god.id] ?? [])].map(normalize);
+}
+
+function resolveGodImage(god: SlavicGod): string | undefined {
+  for (const key of keysForGod(god)) {
+    if (godImageByKey[key]) return godImageByKey[key];
+  }
+  return undefined;
+}
+
 export type GodImageFrame = {
   fit: 'cover' | 'contain';
   position: string;
@@ -46,6 +63,7 @@ const GOD_IMAGE_FRAME: Record<string, GodImageFrame> = {
   posvist: { fit: 'contain', position: 'center 14%' },
   yaginya: { fit: 'contain', position: 'center 12%' },
   belobog: { fit: 'contain', position: 'center 12%' },
+  zorya: { fit: 'contain', position: 'center 10%' },
 };
 
 export function frameFromRatio(ratio: number): GodImageFrame {
@@ -60,21 +78,13 @@ export function getGodImageFrame(god: SlavicGod, ratio?: number): GodImageFrame 
 }
 
 export function getGodImageByGod(god: SlavicGod): string {
-  const byId = godImageByKey[normalize(god.id)];
-  if (byId) return byId;
-
-  const byName = godImageByKey[normalize(god.name)];
-  if (byName) return byName;
-
-  return '/veles-bg.png';
+  return resolveGodImage(god) ?? '/veles-bg.png';
 }
 
 export function hasDedicatedGodImage(god: SlavicGod): boolean {
-  return Boolean(godImageByKey[normalize(god.id)] || godImageByKey[normalize(god.name)]);
+  return Boolean(resolveGodImage(god));
 }
 
 export function getMissingGodImages(): string[] {
-  return SLAVIC_GODS.filter((god) => !godImageByKey[normalize(god.id)] && !godImageByKey[normalize(god.name)]).map(
-    (god) => god.id,
-  );
+  return SLAVIC_GODS.filter((god) => !resolveGodImage(god)).map((god) => god.id);
 }
