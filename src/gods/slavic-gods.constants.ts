@@ -176,16 +176,6 @@ export const SLAVIC_GODS: Record<string, SlavicGodDefinition> = {
     realms: ["Явь"],
     voice: "живой, пылкий",
   },
-  kupala: {
-    name: "Купала",
-    domain: "Лето и Воды",
-    element: "вода",
-    description: "Дух летнего солнцестояния, очищения водой и цветами.",
-    preferredOfferings: ["венки", "травы", "свечи на воде"],
-    symbols: ["огонь на воде", "папоротник", "венок"],
-    realms: ["Явь"],
-    voice: "игривый, таинственный",
-  },
   rod: {
     name: "Род",
     domain: "Род и Предки",
@@ -227,16 +217,6 @@ export const SLAVIC_GODS: Record<string, SlavicGodDefinition> = {
     symbols: ["звезда", "рассвет", "закат"],
     realms: ["Правь", "Явь"],
     voice: "лёгкий, надежды полный",
-  },
-  triglav: {
-    name: "Триглав",
-    domain: "Три Мира",
-    element: "эфир",
-    description: "Трёхглавый страж Яви, Нави и Прави. Единство трёх начал.",
-    preferredOfferings: ["три свечи", "мёд", "хлеб", "вода"],
-    symbols: ["три лица", "три мира", "трезубец"],
-    realms: ["Явь", "Навь", "Правь"],
-    voice: "тройной эхо, цельный",
   },
 };
 

@@ -6,6 +6,7 @@ Naming rule:
 - file name can match either:
   - god `id` from the pantheon (`veles.png`, `perun.jpg`, `mokosh.webp`)
   - or Russian god name (`велес.png`, `перун.jpg`, `мокошь.webp`)
+  - suffix after a dash is ignored (`белобог - AS12.jpg`, `ягиня - AVS.jpg`)
 
 Supported extensions:
 - `.png`, `.jpg`, `.jpeg`, `.webp`, `.avif`, `.gif`

@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { getGodImageByGod, hasDedicatedGodImage } from '../../data/god-images';
 import type { SlavicGod } from '../../data/gods';
 import { GodSymbol } from './GodSymbol';
 import './GodCard.css';
@@ -10,10 +11,12 @@ type Props = {
 };
 
 export function GodCard({ god, selected, onSelect }: Props) {
+  const hasImage = hasDedicatedGodImage(god);
+
   return (
     <button
       type="button"
-      className={`god-card panel-glass ${selected ? 'god-card--selected' : ''}`}
+      className={`god-card panel-glass${selected ? ' god-card--selected' : ''}`}
       onClick={() => onSelect(god)}
       style={{ '--god-accent': god.color } as CSSProperties}
     >
@@ -21,10 +24,19 @@ export function GodCard({ god, selected, onSelect }: Props) {
         ?
         <span className="god-card-tooltip">{god.description}</span>
       </span>
-      <GodSymbol god={god} active={selected} />
-      <h3 className="god-card-name">{god.name}</h3>
-      <p className="god-card-title">{god.title}</p>
-      <p className="god-card-domain">{god.domain}</p>
+      {hasImage ? (
+        <img src={getGodImageByGod(god)} alt={god.name} className="god-card-image" loading="lazy" />
+      ) : (
+        <span className="god-card-image god-card-image--symbol">
+          <GodSymbol god={god} size={48} active={selected} />
+        </span>
+      )}
+      <div className="god-card-body">
+        <p className="god-card-title">{god.title}</p>
+        <h3 className="god-card-name">{god.name}</h3>
+        <p className="god-card-domain">{god.domain}</p>
+        <p className="god-card-summary">{god.description}</p>
+      </div>
     </button>
   );
 }

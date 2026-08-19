@@ -14,9 +14,12 @@ const normalize = (value: string): string =>
 
 const godImageByKey = Object.entries(godImageModules).reduce<Record<string, string>>((acc, [path, url]) => {
   const filename = path.split('/').pop() ?? '';
-  const key = normalize(filename.replace(/\.[^.]+$/, ''));
-  if (key) {
-    acc[key] = url;
+  const stem = filename.replace(/\.[^.]+$/, '');
+  const keys = new Set([normalize(stem), normalize(stem.split(/\s*[-–—]\s*/)[0] ?? '')]);
+  for (const key of keys) {
+    if (key) {
+      acc[key] = url;
+    }
   }
   return acc;
 }, {});
@@ -42,6 +45,7 @@ const GOD_IMAGE_FRAME: Record<string, GodImageFrame> = {
   vyshen: { fit: 'contain', position: 'center 8%' },
   posvist: { fit: 'contain', position: 'center 14%' },
   yaginya: { fit: 'contain', position: 'center 12%' },
+  belobog: { fit: 'contain', position: 'center 12%' },
 };
 
 export function frameFromRatio(ratio: number): GodImageFrame {
@@ -63,6 +67,10 @@ export function getGodImageByGod(god: SlavicGod): string {
   if (byName) return byName;
 
   return '/veles-bg.png';
+}
+
+export function hasDedicatedGodImage(god: SlavicGod): boolean {
+  return Boolean(godImageByKey[normalize(god.id)] || godImageByKey[normalize(god.name)]);
 }
 
 export function getMissingGodImages(): string[] {

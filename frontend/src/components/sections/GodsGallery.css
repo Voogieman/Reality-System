@@ -23,22 +23,43 @@
 
 .gods-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 0.85rem;
+  align-items: stretch;
   max-width: 1100px;
   margin: 0 auto 2rem;
 }
 
 .god-detail {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 1rem;
+  align-items: start;
   max-width: 720px;
   margin: 0 auto;
-  padding: 1.5rem 2rem;
+  padding: 1rem 1.15rem;
+}
+
+.god-detail-image {
+  width: 92px;
+  height: 112px;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 3px;
+  border: 1px solid rgba(201, 162, 39, 0.35);
+}
+
+.god-detail-image--symbol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 12, 20, 0.45);
 }
 
 .god-detail h3 {
   color: var(--amber);
-  margin-bottom: 0.75rem;
-  font-size: 1.4rem;
+  margin-bottom: 0.35rem;
+  font-size: 1.25rem;
 }
 
 .god-detail-desc {
@@ -50,4 +71,19 @@
 .god-detail p {
   font-size: 0.95rem;
   margin-bottom: 0.5rem;
+}
+
+@media (max-width: 600px) {
+  .gods-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .god-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .god-detail-image {
+    width: 100%;
+    height: 180px;
+  }
 }

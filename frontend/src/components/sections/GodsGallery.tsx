@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { getGodImageByGod, hasDedicatedGodImage } from '../../data/god-images';
 import { DEFAULT_GOD, SLAVIC_GODS, type SlavicGod } from '../../data/gods';
 import { GodCard } from '../gods/GodCard';
+import { GodSymbol } from '../gods/GodSymbol';
 import { Section } from '../ui/Section';
 import '../ui/Section.css';
 import './GodsGallery.css';
@@ -52,19 +54,32 @@ export function GodsGallery({ selectedGod, onSelectGod }: Props) {
           />
         ))}
       </div>
-      {selectedGod && (
+      {selectedGod ? (
         <article className="god-detail panel-glass">
-          <h3>{selectedGod.name}</h3>
-          <p className="god-detail-desc">{selectedGod.description}</p>
-          <p>
-            <strong>Подношения:</strong> {selectedGod.offerings.join(', ')}
-          </p>
-          <p>
-            <strong>Символы:</strong> {selectedGod.symbols.join(', ')} · <strong>Миры:</strong>{' '}
-            {selectedGod.realms.join(', ')}
-          </p>
+          {hasDedicatedGodImage(selectedGod) ? (
+            <img
+              src={getGodImageByGod(selectedGod)}
+              alt={selectedGod.name}
+              className="god-detail-image"
+            />
+          ) : (
+            <span className="god-detail-image god-detail-image--symbol">
+              <GodSymbol god={selectedGod} size={56} active />
+            </span>
+          )}
+          <div>
+            <h3>{selectedGod.name}</h3>
+            <p className="god-detail-desc">{selectedGod.description}</p>
+            <p>
+              <strong>Подношения:</strong> {selectedGod.offerings.join(', ')}
+            </p>
+            <p>
+              <strong>Символы:</strong> {selectedGod.symbols.join(', ')} · <strong>Миры:</strong>{' '}
+              {selectedGod.realms.join(', ')}
+            </p>
+          </div>
         </article>
-      )}
+      ) : null}
     </Section>
   );
 }
