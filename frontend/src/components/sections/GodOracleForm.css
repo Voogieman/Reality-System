@@ -4,13 +4,19 @@
   padding: 2rem;
 }
 
-.contact-ai-hint {
-  margin-top: 1rem;
-  font-size: 0.85rem;
-  font-style: italic;
-  color: var(--parchment-dim);
-  opacity: 0.75;
-  text-align: center;
+.oracle-auth-link {
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.oracle-auth-link:hover {
+  color: var(--amber);
 }
 
 .result-box {

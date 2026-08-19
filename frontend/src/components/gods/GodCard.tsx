@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { getGodVoice } from '../../data/god-voices';
 import { getGodImageByGod, hasDedicatedGodImage } from '../../data/god-images';
 import type { SlavicGod } from '../../data/gods';
 import { GodSymbol } from './GodSymbol';
@@ -35,7 +36,7 @@ export function GodCard({ god, selected, onSelect }: Props) {
         <p className="god-card-title">{god.title}</p>
         <h3 className="god-card-name">{god.name}</h3>
         <p className="god-card-domain">{god.domain}</p>
-        <p className="god-card-summary">{god.description}</p>
+        <p className="god-card-summary">{getGodVoice(god).when}</p>
       </div>
     </button>
   );

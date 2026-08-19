@@ -20,7 +20,7 @@ import './components/layout/SectionOverlay.css';
 const SECTION_TITLES: Record<LandingSection, string> = {
   pantheon: 'Пантеон',
   knowledge: 'База знаний',
-  oracle: 'ИИ-Оракул',
+  oracle: 'Голос',
   rituals: 'Ритуалы',
   auth: 'Вход',
   cabinet: 'Личный кабинет',
@@ -38,13 +38,13 @@ export default function App() {
       <main className="app-main">
         <Hero selectedGod={selectedGod} />
         <div className="landing-promo">
+          <GodOracleForm selectedGod={selectedGod} />
           <GodsGallery selectedGod={selectedGod} onSelectGod={setSelectedGod} />
           <KnowledgeBaseSection
             selectedGod={selectedGod}
             onSelectGod={setSelectedGod}
             sectionId="knowledge-base"
           />
-          <GodOracleForm selectedGod={selectedGod} />
           <RitualForm selectedGod={selectedGod} onSelectGod={setSelectedGod} sectionId="ritual" />
         </div>
       </main>

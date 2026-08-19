@@ -1,3 +1,4 @@
+import { godVoiceTitle, getGodVoice } from '../../data/god-voices';
 import type { SlavicGod } from '../../data/gods';
 import './Hero.css';
 
@@ -10,25 +11,21 @@ function scrollToSection(id: string) {
 }
 
 export function Hero({ selectedGod }: Props) {
+  const voice = getGodVoice(selectedGod);
+
   return (
     <section className="hero">
       <div className="hero-content">
-        <p className="hero-epigraph">{selectedGod.title}</p>
+        <p className="hero-epigraph">{godVoiceTitle(selectedGod)}</p>
         <h1 className="hero-title">{selectedGod.name}</h1>
-        <p className="hero-subtitle">{selectedGod.domain}</p>
-        <p className="hero-tagline">{selectedGod.description}</p>
+        <p className="hero-subtitle">{voice.when}</p>
+        <p className="hero-tagline">{voice.promise}</p>
         <div className="hero-actions">
-          <button type="button" className="btn-primary" onClick={() => scrollToSection('gods')}>
-            Пантеон
+          <button type="button" className="btn-primary" onClick={() => scrollToSection('oracle')}>
+            {godVoiceTitle(selectedGod)}
           </button>
-          <button type="button" className="btn-secondary" onClick={() => scrollToSection('knowledge-base')}>
-            База знаний
-          </button>
-          <button type="button" className="btn-secondary" onClick={() => scrollToSection('oracle')}>
-            ИИ-оракул
-          </button>
-          <button type="button" className="btn-secondary" onClick={() => scrollToSection('ritual')}>
-            Ритуалы
+          <button type="button" className="btn-secondary" onClick={() => scrollToSection('gods')}>
+            Выбрать голос
           </button>
         </div>
         <div className="hero-realms">

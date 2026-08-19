@@ -110,14 +110,14 @@ export class RealityController {
   @Post("gods/oracle")
   @ApiTags("gods")
   @ApiBearerAuth("JWT-auth")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({
-    summary: "Пророчество бога (ИИ)",
+    summary: "Голос бога",
     description:
-      "Ответ выбранного божества через LLM. Требуется JWT, userId берётся из токена.",
+      "Ответ выбранного божества. JWT необязателен: без входа знамение приходит, но не сохраняется в историю.",
   })
   @ApiBody({ type: GodOracleDto })
-  async askOracle(@Body() dto: GodOracleDto, @CurrentUser() user: AuthUser) {
+  async askOracle(@Body() dto: GodOracleDto, @CurrentUser() user?: AuthUser) {
     return this.realityService.askOracle(dto, user);
   }
 

@@ -10,7 +10,7 @@
 .hero-content {
   position: relative;
   z-index: 1;
-  max-width: min(400px, 92vw);
+  max-width: min(460px, 92vw);
   margin: 0;
   padding: 1.25rem 1.5rem;
   background: linear-gradient(
@@ -86,7 +86,7 @@
   }
 
   .hero-content {
-    max-width: 360px;
+    max-width: 420px;
   }
 }
 

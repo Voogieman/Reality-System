@@ -1,5 +1,6 @@
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, useEffect, useState } from 'react';
 import { useAuth } from '../../auth/AuthContext';
+import { getGodVoice, godVoiceTitle } from '../../data/god-voices';
 import type { SlavicGod } from '../../data/gods';
 import { useFormSubmit } from '../../hooks/useFormSubmit';
 import { useLanding } from '../../landing/LandingContext';
@@ -36,16 +37,17 @@ type Props = {
 export function GodOracleForm({ selectedGod }: Props) {
   const { user, isAuthenticated } = useAuth();
   const { openSection } = useLanding();
-  const [intention, setIntention] = useState('что готовит мне судьба в ближайший год?');
+  const voice = getGodVoice(selectedGod);
+  const [intention, setIntention] = useState(voice.prompt);
   const [answerCount, setAnswerCount] = useState(readOracleCount);
   const { loading, result, submit } = useFormSubmit();
 
+  useEffect(() => {
+    setIntention(getGodVoice(selectedGod).prompt);
+  }, [selectedGod.id]);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!isAuthenticated) {
-      openSection('auth');
-      return;
-    }
     if (readOracleCount() >= ORACLE_LIMIT) {
       window.alert('оплатите тариф');
       setAnswerCount(ORACLE_LIMIT);
@@ -68,32 +70,38 @@ export function GodOracleForm({ selectedGod }: Props) {
           ...response,
           message: prophecy
             ? `— ${selectedGod.name} говорит —\n\n${prophecy}`
-            : (response.message ?? 'Оракул ответил.'),
+            : (response.message ?? `${selectedGod.name} ответил.`),
         };
       },
-      { successFallback: 'Пророчество получено.' },
+      { successFallback: 'Знамение получено.' },
     );
   };
 
   return (
     <Section
       id="oracle"
-      title="ИИ-Оракул"
-      subtitle={`Спроси ${selectedGod.name} о своём пути`}
+      title={godVoiceTitle(selectedGod)}
+      subtitle={voice.promise}
       divider="☽ ᛉ ☾"
     >
       <form className="oracle-form panel-glass" onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="oracleGod">Божество</label>
-          <input id="oracleGod" value={selectedGod.name} readOnly />
+          <label htmlFor="oracleGod">Голос</label>
+          <input id="oracleGod" value={`${selectedGod.name} — ${voice.when}`} readOnly />
         </div>
         {isAuthenticated && user ? (
-          <p className="oracle-auth-hint">Обращение запишется для {user.displayName}.</p>
+          <p className="oracle-auth-hint">Разговор запишется для {user.displayName}.</p>
         ) : (
-          <p className="oracle-auth-hint">Пророчество доступно после входа или регистрации.</p>
+          <p className="oracle-auth-hint">
+            Можно услышать сразу. Чтобы сохранить диалог,{' '}
+            <button type="button" className="oracle-auth-link" onClick={() => openSection('auth')}>
+              войдите или зарегистрируйтесь
+            </button>
+            .
+          </p>
         )}
         <div className="form-group">
-          <label htmlFor="oracleQuestion">Вопрос или намерение</label>
+          <label htmlFor="oracleQuestion">Вопрос</label>
           <textarea
             id="oracleQuestion"
             value={intention}
@@ -104,13 +112,14 @@ export function GodOracleForm({ selectedGod }: Props) {
         </div>
         <div className="form-actions">
           <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? 'Слушаю знамения...' : 'Получить пророчество'}
+            {loading ? 'Слушаю знамения...' : godVoiceTitle(selectedGod)}
           </button>
         </div>
-        <p className="oracle-auth-hint">Бесплатно: {Math.min(answerCount, ORACLE_LIMIT)} из {ORACLE_LIMIT} ответов.</p>
+        <p className="oracle-auth-hint">
+          Бесплатно: {Math.min(answerCount, ORACLE_LIMIT)} из {ORACLE_LIMIT} ответов.
+        </p>
         <FormResultBox result={result} />
       </form>
     </Section>
   );
 }
-

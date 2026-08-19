@@ -218,7 +218,7 @@ export function CabinetSection() {
         </article>
 
         <article className="cabinet-card panel-glass">
-          <h3 className="cabinet-card-title">История диалогов с ИИ-оракулом</h3>
+          <h3 className="cabinet-card-title">История диалогов</h3>
           {oracles.length === 0 ? (
             <p className="cabinet-empty">Ещё не было вопросов богам.</p>
           ) : (
