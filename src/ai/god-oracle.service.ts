@@ -12,6 +12,10 @@ export type OracleContext = {
   purity?: number;
   significance?: number;
   userId?: string;
+  displayName?: string;
+  communicationStyle?: string;
+  situationNeed?: string;
+  sessionId?: string;
 };
 
 @Injectable()
@@ -72,6 +76,8 @@ export class GodOracleService {
         offering,
         prophecy,
         model: this.config.model,
+        sessionId: context.sessionId ?? null,
+        communicationStyle: context.communicationStyle ?? null,
       });
     }
 

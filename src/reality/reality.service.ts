@@ -16,10 +16,18 @@ import { RegisterUserDto } from "./dto/register-user.dto";
 import { ConfirmEmailDto } from "./dto/confirm-email.dto";
 import { GodOracleService } from "../ai/god-oracle.service";
 import { GodOracleDto } from "./dto/god-oracle.dto";
+import { MatchGodDto } from "./dto/match-god.dto";
+import { OracleFeedbackDto } from "./dto/oracle-feedback.dto";
+import { TelegramAuthDto } from "./dto/telegram-auth.dto";
 import { AiConfigService } from "../ai/ai-config.service";
 import { LoginDto } from "./dto/login.dto";
 import { CreateSupportTicketDto } from "./dto/create-support-ticket.dto";
 import { AuthUser, JwtPayload } from "../auth/jwt-payload.interface";
+import { GodMatcherService } from "../ai/god-matcher.service";
+import { NotificationService } from "../notifications/notification.service";
+import { TelegramService } from "../notifications/telegram.service";
+import { EmailService } from "../notifications/email.service";
+import { SLAVIC_GODS } from "../gods/slavic-gods.constants";
 
 @Injectable()
 export class RealityService {
@@ -31,8 +39,12 @@ export class RealityService {
     private readonly ritualsService: RitualsService,
     private readonly databaseService: DatabaseService,
     private readonly godOracle: GodOracleService,
+    private readonly godMatcher: GodMatcherService,
     private readonly aiConfig: AiConfigService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly notifications: NotificationService,
+    private readonly telegram: TelegramService,
+    private readonly email: EmailService
   ) {}
 
   listGods() {
@@ -47,10 +59,18 @@ export class RealityService {
 
   async askOracle(dto: GodOracleDto, authUser?: AuthUser) {
     const userId = authUser?.userId ?? dto.userId;
+    const profile = userId
+      ? await this.databaseService.getUserById(userId)
+      : null;
     const oracle = await this.godOracle.speak({
       godName: dto.godName,
       intention: dto.intention,
       userId,
+      displayName: profile?.displayName,
+      communicationStyle:
+        dto.communicationStyle ?? profile?.communicationStyle ?? undefined,
+      situationNeed: dto.situationNeed ?? profile?.situationNeed ?? undefined,
+      sessionId: dto.sessionId,
       offeringType: dto.offering?.type,
       purity: dto.offering?.purity,
       significance: dto.offering?.significance,
@@ -171,6 +191,11 @@ export class RealityService {
     this.logger.log(
       `Email confirmation link for ${normalizedEmail}: ${confirmationUrl}`
     );
+    await this.email.send(
+      normalizedEmail,
+      "Подтверждение круга Велеса",
+      `Дорогой странник, подтверди почту по ссылке:\n${confirmationUrl}\n\nСсылка действует 24 часа.`
+    );
 
     return {
       success: true,
@@ -238,41 +263,7 @@ export class RealityService {
       throw new UnauthorizedException("Подтвердите email перед входом");
     }
 
-    const sessionId = `sess_${Date.now()}_${Math.floor(
-      Math.random() * 100000
-    )}`;
-    const expiresAt = new Date(Date.now() + this.sessionTtlMs);
-    const payload: JwtPayload = {
-      sub: user.id,
-      email: user.email,
-      displayName: user.displayName,
-      sid: sessionId,
-    };
-
-    const accessToken = await this.jwtService.signAsync(payload);
-
-    await this.databaseService.createSession({
-      id: sessionId,
-      userId: user.id,
-      tokenHash: this.hashSessionToken(accessToken),
-      expiresAt,
-    });
-
-    return {
-      success: true,
-      message: "Вход выполнен",
-      data: {
-        accessToken,
-        tokenType: "Bearer",
-        expiresIn: process.env.JWT_EXPIRES_IN || "7d",
-        user: {
-          id: user.id,
-          email: user.email,
-          displayName: user.displayName,
-        },
-      },
-      timestamp: new Date().toISOString(),
-    };
+    return this.issueAuthSession(user, "Вход выполнен");
   }
 
   async logout(authUser: AuthUser) {
@@ -306,6 +297,11 @@ export class RealityService {
         email: user.email,
         displayName: user.displayName,
         emailConfirmed: user.emailConfirmed,
+        telegramLinked: Boolean(user.telegramChatId || user.telegramId),
+        telegramUsername: user.telegramUsername,
+        preferredGodId: user.preferredGodId,
+        communicationStyle: user.communicationStyle,
+        telegramBotUsername: this.telegram.botUsername ?? null,
       },
       timestamp: new Date().toISOString(),
     };
@@ -390,6 +386,241 @@ export class RealityService {
     }
 
     return timingSafeEqual(keyBuffer, derivedBuffer);
+  }
+
+  async matchGod(dto: MatchGodDto, authUser?: AuthUser) {
+    const match = await this.godMatcher.match({
+      situation: dto.situation,
+      need: dto.need,
+      tone: dto.tone,
+    });
+
+    if (authUser?.userId && this.databaseService.isAvailable()) {
+      await this.databaseService.updateUser(authUser.userId, {
+        preferredGodId: match.godId,
+        communicationStyle: dto.tone ?? undefined,
+        situationNeed: dto.situation,
+      });
+    }
+
+    return {
+      success: true,
+      message: `${match.godName} откликнулся на твою ситуацию`,
+      data: match,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  async submitOracleFeedback(dto: OracleFeedbackDto, authUser?: AuthUser) {
+    if (!this.databaseService.isAvailable()) {
+      throw new ServiceUnavailableException("База данных недоступна");
+    }
+
+    const message = await this.databaseService.getOracleMessageById(dto.messageId);
+    if (!message) {
+      throw new BadRequestException("Знамение не найдено");
+    }
+    if (authUser?.userId && message.userId && message.userId !== authUser.userId) {
+      throw new UnauthorizedException("Это не твоя сессия");
+    }
+
+    await this.databaseService.updateOracleMessage(dto.messageId, {
+      emotion: dto.emotion,
+    });
+
+    const userId = authUser?.userId ?? message.userId;
+    if (userId) {
+      const god = SLAVIC_GODS[message.godId];
+      await this.notifications.notifyUser(
+        userId,
+        "Сессия с божеством завершена",
+        `Разговор с ${god?.name ?? message.godId} закрыт. Отклик: ${dto.emotion}.${
+          dto.note ? ` ${dto.note}` : ""
+        }`,
+        { email: true, telegram: true }
+      );
+    }
+
+    return {
+      success: true,
+      message: "Отклик принят. Сессия закрыта.",
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  async loginWithTelegram(dto: TelegramAuthDto) {
+    if (!this.telegram.enabled) {
+      throw new ServiceUnavailableException(
+        "Telegram-бот ещё не настроен. Задай TELEGRAM_BOT_TOKEN."
+      );
+    }
+    if (!this.telegram.verifyLogin(dto)) {
+      throw new UnauthorizedException("Подпись Telegram не сошлась");
+    }
+    if (Date.now() / 1000 - dto.auth_date > 86400) {
+      throw new UnauthorizedException("Сессия Telegram устарела");
+    }
+
+    const telegramId = String(dto.id);
+    let user = await this.databaseService.getUserByTelegramId(telegramId);
+    const displayName = [dto.first_name, dto.last_name].filter(Boolean).join(" ") ||
+      dto.username ||
+      "Странник";
+
+    if (!user) {
+      const userId = `usr_tg_${dto.id}`;
+      await this.databaseService.createUser({
+        id: userId,
+        email: `tg_${dto.id}@telegram.local`,
+        passwordHash: this.hashPassword(randomBytes(24).toString("hex")),
+        displayName,
+        emailConfirmed: true,
+        telegramId,
+        telegramChatId: telegramId,
+        telegramUsername: dto.username ?? null,
+      });
+      user = await this.databaseService.getUserByTelegramId(telegramId);
+    } else {
+      await this.databaseService.updateUser(user.id, {
+        telegramChatId: user.telegramChatId ?? telegramId,
+        telegramUsername: dto.username ?? user.telegramUsername,
+        displayName: user.displayName || displayName,
+      });
+      user = await this.databaseService.getUserById(user.id);
+    }
+
+    if (!user) {
+      throw new ServiceUnavailableException("Не удалось открыть круг через Telegram");
+    }
+
+    return this.issueAuthSession(user, "Вход через Telegram выполнен");
+  }
+
+  async createTelegramLink(authUser: AuthUser) {
+    if (!this.databaseService.isAvailable()) {
+      throw new ServiceUnavailableException("База данных недоступна");
+    }
+
+    const token = randomBytes(16).toString("hex");
+    await this.databaseService.updateUser(authUser.userId, {
+      telegramLinkToken: token,
+    });
+    const username = this.telegram.botUsername;
+    const deepLink = username
+      ? `https://t.me/${username}?start=${token}`
+      : null;
+
+    return {
+      success: true,
+      data: {
+        token,
+        botUsername: username ?? null,
+        deepLink,
+        enabled: this.telegram.enabled,
+      },
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  async getTelegramStatus(authUser: AuthUser) {
+    const user = await this.databaseService.getUserById(authUser.userId);
+    return {
+      success: true,
+      data: {
+        linked: Boolean(user?.telegramChatId || user?.telegramId),
+        username: user?.telegramUsername ?? null,
+        botUsername: this.telegram.botUsername ?? null,
+        enabled: this.telegram.enabled,
+      },
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  async handleTelegramWebhook(body: Record<string, unknown>) {
+    const message = body.message as
+      | {
+          text?: string;
+          chat?: { id?: number };
+          from?: { id?: number; username?: string; first_name?: string };
+        }
+      | undefined;
+    const text = message?.text?.trim() ?? "";
+    const chatId = message?.chat?.id != null ? String(message.chat.id) : "";
+    const fromId = message?.from?.id != null ? String(message.from.id) : "";
+    if (!text || !chatId) {
+      return { ok: true };
+    }
+
+    const startMatch = text.match(/^\/start(?:\s+(.+))?$/);
+    if (startMatch && this.databaseService.isAvailable()) {
+      const payload = startMatch[1]?.trim();
+      if (payload) {
+        const user = await this.databaseService.getUserByTelegramLinkToken(payload);
+        if (user) {
+          await this.databaseService.updateUser(user.id, {
+            telegramChatId: chatId,
+            telegramId: fromId || user.telegramId,
+            telegramUsername: message?.from?.username ?? user.telegramUsername,
+            telegramLinkToken: null,
+          });
+          await this.telegram.sendMessage(
+            chatId,
+            "Круг связан. Сюда будут приходить статусы ритуалов и завершение сессии с божеством."
+          );
+          return { ok: true, linked: true };
+        }
+      }
+
+      await this.telegram.sendMessage(
+        chatId,
+        "Дорогой странник, добро пожаловать. Открой личный кабинет на сайте и нажми «Привязать Telegram», затем снова /start с кодом."
+      );
+    }
+
+    return { ok: true };
+  }
+
+  private async issueAuthSession(
+    user: {
+      id: string;
+      email: string;
+      displayName: string;
+    },
+    message: string
+  ) {
+    const sessionId = `sess_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
+    const expiresAt = new Date(Date.now() + this.sessionTtlMs);
+    const payload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+      displayName: user.displayName,
+      sid: sessionId,
+    };
+
+    const accessToken = await this.jwtService.signAsync(payload);
+
+    await this.databaseService.createSession({
+      id: sessionId,
+      userId: user.id,
+      tokenHash: this.hashSessionToken(accessToken),
+      expiresAt,
+    });
+
+    return {
+      success: true,
+      message,
+      data: {
+        accessToken,
+        tokenType: "Bearer",
+        expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+        user: {
+          id: user.id,
+          email: user.email,
+          displayName: user.displayName,
+        },
+      },
+      timestamp: new Date().toISOString(),
+    };
   }
 
   private hashSessionToken(token: string): string {

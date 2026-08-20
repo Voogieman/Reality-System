@@ -23,6 +23,15 @@ export class OracleMessageEntity {
   @Column({ length: 128 })
   model: string;
 
+  @Column({ name: "session_id", length: 64, nullable: true })
+  sessionId: string | null;
+
+  @Column({ name: "communication_style", length: 32, nullable: true })
+  communicationStyle: string | null;
+
+  @Column({ length: 32, nullable: true })
+  emotion: string | null;
+
   @CreateDateColumn({ name: "created_at" })
   createdAt: Date;
 }

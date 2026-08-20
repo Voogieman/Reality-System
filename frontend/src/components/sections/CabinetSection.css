@@ -13,6 +13,15 @@
   align-items: center;
 }
 
+.cabinet-telegram {
+  margin-bottom: 1.5rem;
+}
+
+.cabinet-telegram p {
+  color: var(--parchment-dim);
+  margin-bottom: 0.75rem;
+}
+
 .cabinet-profile {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));

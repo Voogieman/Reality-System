@@ -6,9 +6,10 @@ import { GodsService } from "../gods/gods.service";
 import { DatabaseModule } from "../database/database.module";
 import { AiModule } from "../ai/ai.module";
 import { AuthModule } from "../auth/auth.module";
+import { NotificationsModule } from "../notifications/notifications.module";
 
 @Module({
-  imports: [AiModule, DatabaseModule, AuthModule],
+  imports: [AiModule, DatabaseModule, AuthModule, NotificationsModule],
   controllers: [RealityController],
   providers: [RealityService, GodsService, RitualsService],
   exports: [RealityService],

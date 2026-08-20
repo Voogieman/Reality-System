@@ -2,6 +2,7 @@ import { type MouseEvent, useMemo, useState } from 'react';
 import { getGodLore } from '../../data/god-knowledge';
 import { getGodImageByGod } from '../../data/god-images';
 import { SLAVIC_GODS, type SlavicGod } from '../../data/gods';
+import { useLanding } from '../../landing/LandingContext';
 import { Modal } from '../ui/Modal';
 import { Section } from '../ui/Section';
 import '../ui/Section.css';
@@ -98,6 +99,7 @@ type Props = {
 };
 
 export function KnowledgeBaseSection({ selectedGod, onSelectGod, sectionId }: Props) {
+  const { active, goBack } = useLanding();
   const [search, setSearch] = useState('');
   const [openGodId, setOpenGodId] = useState<string | null>(null);
   const [previewGodId, setPreviewGodId] = useState<string | null>(null);
@@ -146,6 +148,11 @@ export function KnowledgeBaseSection({ selectedGod, onSelectGod, sectionId }: Pr
       subtitle="Компактные карточки пантеона — откройте карточку или посмотрите быстрый обзор"
       divider="☽ ᛉ ☾"
     >
+      {active === 'knowledge' && !openGod ? (
+        <button type="button" className="knowledge-back" onClick={goBack}>
+          ← Назад
+        </button>
+      ) : null}
       {openGod ? (
         <div className="knowledge-open">
           <button type="button" className="knowledge-back" onClick={() => setOpenGodId(null)}>

@@ -6,13 +6,16 @@ import type {
   GodOraclePayload,
   LoginPayload,
   LoginResponseData,
+  OracleFeedbackPayload,
   OracleHistoryItem,
+  GodMatchPayload,
   PerformRitualPayload,
   RegisterPayload,
   RegisterResponseData,
   RitualHistoryItem,
   SupportTicketItem,
   SupportTicketPayload,
+  TelegramAuthPayload,
 } from './types';
 
 export const realityApi = {
@@ -75,4 +78,41 @@ export const realityApi = {
 
   getSupportTickets: () =>
     apiRequest<ApiResponse<SupportTicketItem[]>>('/reality/support', { auth: true }),
+
+  matchGod: (payload: GodMatchPayload) =>
+    apiRequest<ApiResponse>('/reality/gods/match', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      auth: true,
+    }),
+
+  oracleFeedback: (payload: OracleFeedbackPayload) =>
+    apiRequest<ApiResponse>('/reality/gods/oracle/feedback', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      auth: true,
+    }),
+
+  loginTelegram: (payload: TelegramAuthPayload) =>
+    apiRequest<ApiResponse<LoginResponseData>>('/reality/auth/telegram', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  telegramConfig: () =>
+    apiRequest<ApiResponse<{ botUsername?: string | null; enabled?: boolean }>>(
+      '/reality/auth/telegram/config',
+    ),
+
+  telegramStatus: () =>
+    apiRequest<ApiResponse<{ linked?: boolean; username?: string | null; botUsername?: string | null; enabled?: boolean }>>(
+      '/reality/auth/telegram',
+      { auth: true },
+    ),
+
+  linkTelegram: () =>
+    apiRequest<ApiResponse<{ token?: string; botUsername?: string | null; deepLink?: string | null; enabled?: boolean }>>(
+      '/reality/auth/telegram/link',
+      { method: 'POST', auth: true },
+    ),
 };

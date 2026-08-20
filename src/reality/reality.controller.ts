@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Query,
   UseGuards,
+  Req,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -26,6 +27,10 @@ import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { OptionalJwtAuthGuard } from "../auth/optional-jwt-auth.guard";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { AuthUser } from "../auth/jwt-payload.interface";
+import { MatchGodDto } from "./dto/match-god.dto";
+import { OracleFeedbackDto } from "./dto/oracle-feedback.dto";
+import { TelegramAuthDto } from "./dto/telegram-auth.dto";
+import type { Request } from "express";
 
 @ApiTags("reality")
 @Controller("reality")
@@ -119,6 +124,90 @@ export class RealityController {
   @ApiBody({ type: GodOracleDto })
   async askOracle(@Body() dto: GodOracleDto, @CurrentUser() user?: AuthUser) {
     return this.realityService.askOracle(dto, user);
+  }
+
+  @Post("gods/match")
+  @ApiTags("gods")
+  @ApiBearerAuth("JWT-auth")
+  @UseGuards(OptionalJwtAuthGuard)
+  @ApiOperation({
+    summary: "Определитель божества",
+    description: "Оракул подбирает голос пантеона под ситуацию странника",
+  })
+  async matchGod(@Body() dto: MatchGodDto, @CurrentUser() user?: AuthUser) {
+    return this.realityService.matchGod(dto, user);
+  }
+
+  @Post("gods/oracle/feedback")
+  @ApiTags("gods")
+  @ApiBearerAuth("JWT-auth")
+  @UseGuards(OptionalJwtAuthGuard)
+  @ApiOperation({
+    summary: "Эмоциональный отклик после сессии",
+    description: "Закрывает сессию с божеством и шлёт уведомление",
+  })
+  async oracleFeedback(
+    @Body() dto: OracleFeedbackDto,
+    @CurrentUser() user?: AuthUser
+  ) {
+    return this.realityService.submitOracleFeedback(dto, user);
+  }
+
+  @Post("auth/telegram")
+  @ApiTags("auth")
+  @ApiOperation({
+    summary: "Вход или регистрация через Telegram",
+  })
+  async loginTelegram(@Body() dto: TelegramAuthDto) {
+    return this.realityService.loginWithTelegram(dto);
+  }
+
+  @Post("auth/telegram/link")
+  @ApiTags("auth")
+  @ApiBearerAuth("JWT-auth")
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: "Создать ссылку привязки Telegram-бота" })
+  async linkTelegram(@CurrentUser() user: AuthUser) {
+    return this.realityService.createTelegramLink(user);
+  }
+
+  @Get("auth/telegram")
+  @ApiTags("auth")
+  @ApiBearerAuth("JWT-auth")
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: "Статус привязки Telegram" })
+  async telegramStatus(@CurrentUser() user: AuthUser) {
+    return this.realityService.getTelegramStatus(user);
+  }
+
+  @Get("auth/telegram/config")
+  @ApiTags("auth")
+  @ApiOperation({ summary: "Публичный конфиг Telegram-бота" })
+  telegramConfig() {
+    return {
+      success: true,
+      data: {
+        botUsername: this.telegramBotUsername(),
+        enabled: this.telegramEnabled(),
+      },
+    };
+  }
+
+  private telegramBotUsername(): string | null {
+    return process.env.TELEGRAM_BOT_USERNAME?.trim()?.replace(/^@/, "") || null;
+  }
+
+  private telegramEnabled(): boolean {
+    return Boolean(process.env.TELEGRAM_BOT_TOKEN?.trim());
+  }
+
+  @Post("telegram/webhook")
+  @ApiTags("auth")
+  @ApiOperation({ summary: "Webhook Telegram-бота" })
+  async telegramWebhook(@Req() req: Request) {
+    return this.realityService.handleTelegramWebhook(
+      (req.body ?? {}) as Record<string, unknown>
+    );
   }
 
   @Get("oracle/history")

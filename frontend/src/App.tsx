@@ -2,6 +2,8 @@ import { AppBackground } from './components/layout/AppBackground';
 import { Footer } from './components/layout/Footer';
 import { Header } from './components/layout/Header';
 import { SectionOverlay } from './components/layout/SectionOverlay';
+import { MagicAssistant } from './components/assistant/MagicAssistant';
+import { AboutSection } from './components/sections/AboutSection';
 import { AuthSection } from './components/sections/AuthSection';
 import { CabinetSection } from './components/sections/CabinetSection';
 import { GodOracleForm } from './components/sections/GodOracleForm';
@@ -25,11 +27,12 @@ const SECTION_TITLES: Record<LandingSection, string> = {
   auth: 'Вход',
   cabinet: 'Личный кабинет',
   support: 'Поддержка',
+  about: 'Об авторе',
 };
 
 export default function App() {
   const [selectedGod, setSelectedGod] = useState<SlavicGod>(DEFAULT_GOD);
-  const { active, closeSection } = useLanding();
+  const { active, closeSection, goBack, canGoBack } = useLanding();
 
   return (
     <>
@@ -49,8 +52,15 @@ export default function App() {
         </div>
       </main>
       <Footer />
+      <MagicAssistant onSelectGod={setSelectedGod} />
 
-      <SectionOverlay open={Boolean(active)} title={active ? SECTION_TITLES[active] : ''} onClose={closeSection}>
+      <SectionOverlay
+        open={Boolean(active)}
+        title={active ? SECTION_TITLES[active] : ''}
+        onClose={closeSection}
+        onBack={goBack}
+        canGoBack={canGoBack}
+      >
         {active === 'auth' ? <AuthSection /> : null}
         {active === 'knowledge' ? (
           <KnowledgeBaseSection selectedGod={selectedGod} onSelectGod={setSelectedGod} />
@@ -58,6 +68,7 @@ export default function App() {
         {active === 'cabinet' ? <CabinetSection /> : null}
         {active === 'rituals' ? <RitualForm selectedGod={selectedGod} onSelectGod={setSelectedGod} /> : null}
         {active === 'support' ? <SupportSection /> : null}
+        {active === 'about' ? <AboutSection /> : null}
       </SectionOverlay>
     </>
   );

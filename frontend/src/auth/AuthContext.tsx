@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import { realityApi } from '../lib/api/reality.api';
-import type { LoginPayload, RegisterPayload } from '../lib/api/types';
+import type { LoginPayload, RegisterPayload, TelegramAuthPayload } from '../lib/api/types';
 import {
   clearAuthSession,
   getStoredToken,
@@ -22,6 +22,7 @@ type AuthContextValue = {
   loading: boolean;
   isAuthenticated: boolean;
   login: (payload: LoginPayload) => Promise<void>;
+  loginTelegram: (payload: TelegramAuthPayload) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<{ confirmationUrl?: string; message: string }>;
   confirmEmail: (token: string) => Promise<string>;
   logout: () => Promise<void>;
@@ -85,6 +86,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(nextUser);
   }, []);
 
+  const loginTelegram = useCallback(async (payload: TelegramAuthPayload) => {
+    const response = await realityApi.loginTelegram(payload);
+    const data = response.data;
+    if (!data?.accessToken || !data.user) {
+      throw new Error('Сервер не вернул JWT');
+    }
+    const nextUser: StoredAuthUser = {
+      id: data.user.id,
+      email: data.user.email,
+      displayName: data.user.displayName,
+    };
+    saveAuthSession(data.accessToken, nextUser);
+    setToken(data.accessToken);
+    setUser(nextUser);
+  }, []);
+
   const register = useCallback(async (payload: RegisterPayload) => {
     const response = await realityApi.register(payload);
     return {
@@ -117,6 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         isAuthenticated: Boolean(user && token),
         login,
+        loginTelegram,
         register,
         confirmEmail,
         logout,

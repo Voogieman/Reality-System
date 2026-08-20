@@ -20,6 +20,13 @@ export interface UserRecord {
   passwordHash: string;
   displayName: string;
   emailConfirmed: boolean;
+  telegramId: string | null;
+  telegramChatId: string | null;
+  telegramUsername: string | null;
+  telegramLinkToken: string | null;
+  preferredGodId: string | null;
+  communicationStyle: string | null;
+  situationNeed: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -79,6 +86,9 @@ export interface OracleMessageRecord {
   offering: Record<string, unknown> | null;
   prophecy: string;
   model: string;
+  sessionId: string | null;
+  communicationStyle: string | null;
+  emotion: string | null;
   createdAt: Date;
 }
 
@@ -160,13 +170,56 @@ export class DatabaseService implements OnModuleInit {
     return row ? this.mapUser(row) : null;
   }
 
+  async getUserByTelegramId(telegramId: string): Promise<UserRecord | null> {
+    const row = await this.userRepo.findOne({ where: { telegramId } });
+    return row ? this.mapUser(row) : null;
+  }
+
+  async getUserByTelegramLinkToken(token: string): Promise<UserRecord | null> {
+    const row = await this.userRepo.findOne({ where: { telegramLinkToken: token } });
+    return row ? this.mapUser(row) : null;
+  }
+
+  async updateUser(
+    userId: string,
+    patch: Partial<
+      Pick<
+        UserRecord,
+        | "telegramId"
+        | "telegramChatId"
+        | "telegramUsername"
+        | "telegramLinkToken"
+        | "preferredGodId"
+        | "communicationStyle"
+        | "situationNeed"
+        | "emailConfirmed"
+        | "displayName"
+      >
+    >
+  ): Promise<void> {
+    await this.userRepo.update({ id: userId }, patch);
+  }
+
+  async getOracleMessageById(id: string): Promise<OracleMessageRecord | null> {
+    const row = await this.oracleMessageRepo.findOne({ where: { id } });
+    return row ? this.mapOracleMessage(row) : null;
+  }
+
+  async updateOracleMessage(
+    id: string,
+    patch: Partial<Pick<OracleMessageRecord, "emotion" | "sessionId" | "communicationStyle">>
+  ): Promise<void> {
+    await this.oracleMessageRepo.update({ id }, patch);
+  }
+
   async getUserById(userId: string): Promise<UserRecord | null> {
     const row = await this.userRepo.findOne({ where: { id: userId } });
     return row ? this.mapUser(row) : null;
   }
 
   async createUser(
-    input: Omit<UserRecord, "createdAt" | "updatedAt">
+    input: Pick<UserRecord, "id" | "email" | "passwordHash" | "displayName" | "emailConfirmed"> &
+      Partial<UserRecord>
   ): Promise<void> {
     await this.userRepo.save({
       id: input.id,
@@ -174,6 +227,13 @@ export class DatabaseService implements OnModuleInit {
       passwordHash: input.passwordHash,
       displayName: input.displayName,
       emailConfirmed: input.emailConfirmed,
+      telegramId: input.telegramId ?? null,
+      telegramChatId: input.telegramChatId ?? null,
+      telegramUsername: input.telegramUsername ?? null,
+      telegramLinkToken: input.telegramLinkToken ?? null,
+      preferredGodId: input.preferredGodId ?? null,
+      communicationStyle: input.communicationStyle ?? null,
+      situationNeed: input.situationNeed ?? null,
     });
   }
 
@@ -358,6 +418,8 @@ export class DatabaseService implements OnModuleInit {
     offering: Record<string, unknown> | null;
     prophecy: string;
     model: string;
+    sessionId?: string | null;
+    communicationStyle?: string | null;
   }): Promise<void> {
     await this.oracleMessageRepo.save({
       id: input.id,
@@ -367,6 +429,9 @@ export class DatabaseService implements OnModuleInit {
       offering: input.offering,
       prophecy: input.prophecy,
       model: input.model,
+      sessionId: input.sessionId ?? null,
+      communicationStyle: input.communicationStyle ?? null,
+      emotion: null,
     });
   }
 
@@ -380,16 +445,7 @@ export class DatabaseService implements OnModuleInit {
       take: limit,
     });
 
-    return rows.map((row) => ({
-      id: row.id,
-      userId: row.userId,
-      godId: row.godId,
-      intention: row.intention,
-      offering: row.offering,
-      prophecy: row.prophecy,
-      model: row.model,
-      createdAt: row.createdAt,
-    }));
+    return rows.map((row) => this.mapOracleMessage(row));
   }
 
   async createSupportTicket(input: {
@@ -436,8 +492,31 @@ export class DatabaseService implements OnModuleInit {
       passwordHash: row.passwordHash,
       displayName: row.displayName,
       emailConfirmed: row.emailConfirmed,
+      telegramId: row.telegramId ?? null,
+      telegramChatId: row.telegramChatId ?? null,
+      telegramUsername: row.telegramUsername ?? null,
+      telegramLinkToken: row.telegramLinkToken ?? null,
+      preferredGodId: row.preferredGodId ?? null,
+      communicationStyle: row.communicationStyle ?? null,
+      situationNeed: row.situationNeed ?? null,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
+    };
+  }
+
+  private mapOracleMessage(row: OracleMessageEntity): OracleMessageRecord {
+    return {
+      id: row.id,
+      userId: row.userId,
+      godId: row.godId,
+      intention: row.intention,
+      offering: row.offering,
+      prophecy: row.prophecy,
+      model: row.model,
+      sessionId: row.sessionId ?? null,
+      communicationStyle: row.communicationStyle ?? null,
+      emotion: row.emotion ?? null,
+      createdAt: row.createdAt,
     };
   }
 

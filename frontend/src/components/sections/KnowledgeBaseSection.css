@@ -124,7 +124,11 @@
 }
 
 .knowledge-back {
+  display: inline-block;
   margin-bottom: 1rem;
+  background: none;
+  border: 0;
+  cursor: pointer;
   color: var(--gold);
   font-family: var(--font-display);
   font-size: 0.82rem;

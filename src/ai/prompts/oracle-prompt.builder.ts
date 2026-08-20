@@ -96,8 +96,28 @@ function buildUserLayer(
 ): string {
   const lines: string[] = [`К тебе, ${god.name}, пришёл странник.`];
 
-  if (context.userId) {
-    lines.push(`Имя/метка духа: ${context.userId}.`);
+  if (context.displayName) {
+    lines.push(`Имя странника: ${context.displayName}.`);
+  } else if (context.userId) {
+    lines.push(`Метка духа: ${context.userId}.`);
+  }
+
+  if (context.situationNeed) {
+    lines.push(`Его ситуация: ${context.situationNeed}.`);
+  }
+
+  if (context.communicationStyle === "direct") {
+    lines.push(
+      "ФОРМА ОБЩЕНИЯ С ЭТИМ СТРАННИКОМ: прямо, коротко, один ясный шаг. Без утешений."
+    );
+  } else if (context.communicationStyle === "gentle") {
+    lines.push(
+      "ФОРМА ОБЩЕНИЯ С ЭТИМ СТРАННИКОМ: мягко, держи за руку, не дави. Образ, затем шаг."
+    );
+  } else if (context.communicationStyle === "images") {
+    lines.push(
+      "ФОРМА ОБЩЕНИЯ С ЭТИМ СТРАННИКОМ: говори образами и знаками, минимум инструкций."
+    );
   }
 
   if (context.offeringType != null) {

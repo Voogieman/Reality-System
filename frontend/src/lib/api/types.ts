@@ -61,6 +61,9 @@ export type GodOraclePayload = {
   intention: string;
   userId?: string;
   offering?: { type: string; purity?: number; significance?: number };
+  communicationStyle?: string;
+  situationNeed?: string;
+  sessionId?: string;
 };
 
 export type GodListItem = {
@@ -79,6 +82,33 @@ export type AuthUserDto = {
   email: string;
   displayName: string;
   emailConfirmed?: boolean;
+  telegramLinked?: boolean;
+  telegramUsername?: string | null;
+  preferredGodId?: string | null;
+  communicationStyle?: string | null;
+  telegramBotUsername?: string | null;
+};
+
+export type TelegramAuthPayload = {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  photo_url?: string;
+  auth_date: number;
+  hash: string;
+};
+
+export type GodMatchPayload = {
+  situation: string;
+  need?: string;
+  tone?: string;
+};
+
+export type OracleFeedbackPayload = {
+  messageId: string;
+  emotion: string;
+  note?: string;
 };
 
 export type LoginResponseData = {

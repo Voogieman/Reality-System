@@ -1,7 +1,7 @@
 .section-overlay {
   position: fixed;
   inset: 0;
-  z-index: 140;
+  z-index: 200;
   display: grid;
   place-items: center;
   padding: 1rem;
@@ -36,6 +36,22 @@
   border-bottom: 1px solid rgba(201, 162, 39, 0.22);
 }
 
+.section-overlay-back {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 0.2rem 0.15rem;
+}
+
+.section-overlay-back:hover {
+  color: var(--amber);
+}
+
 .section-overlay-kicker {
   font-family: var(--font-display);
   font-size: 0.78rem;
@@ -66,6 +82,11 @@
 
 .section-overlay-body .section-subtitle {
   margin-bottom: 1.4rem;
+}
+
+.section-overlay-body:has(.about-section) {
+  overflow: hidden;
+  padding: 0;
 }
 
 .portal-grid {

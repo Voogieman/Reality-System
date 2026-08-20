@@ -84,6 +84,10 @@ export function CabinetSection() {
   const [tickets, setTickets] = useState<SupportTicketItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [tgLinked, setTgLinked] = useState(false);
+  const [tgUsername, setTgUsername] = useState<string | null>(null);
+  const [tgLink, setTgLink] = useState<string | null>(null);
+  const [tgHint, setTgHint] = useState<string | null>(null);
   const filteredRituals =
     ritualGodFilter === 'all'
       ? rituals
@@ -94,14 +98,17 @@ export function CabinetSection() {
     setLoading(true);
     setError(null);
     try {
-      const [ritualRes, oracleRes, supportRes] = await Promise.all([
+      const [ritualRes, oracleRes, supportRes, tgRes] = await Promise.all([
         realityApi.getRitualHistory(),
         realityApi.getOracleHistory(),
         realityApi.getSupportTickets(),
+        realityApi.telegramStatus(),
       ]);
       setRituals(Array.isArray(ritualRes.data) ? ritualRes.data : []);
       setOracles(Array.isArray(oracleRes.data) ? oracleRes.data : []);
       setTickets(Array.isArray(supportRes.data) ? supportRes.data : []);
+      setTgLinked(Boolean(tgRes.data?.linked));
+      setTgUsername(tgRes.data?.username ?? null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось загрузить кабинет');
     } finally {
@@ -165,6 +172,48 @@ export function CabinetSection() {
           {loading ? 'Обновляю...' : 'Обновить'}
         </button>
       </div>
+
+      <article className="cabinet-card panel-glass cabinet-telegram">
+        <h3 className="cabinet-card-title">Telegram-бот</h3>
+        <p>
+          Сюда же будут приходить уведомления: статус ритуала и завершение сессии с божеством.
+          Пока статусы ритуалов также уходят на почту {user.email}.
+        </p>
+        {tgLinked ? (
+          <p className="cabinet-value">Привязан{tgUsername ? `: @${tgUsername}` : ''}.</p>
+        ) : (
+          <>
+            <p className="cabinet-empty">Бот ещё не связан с кругом.</p>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={async () => {
+                try {
+                  const res = await realityApi.linkTelegram();
+                  setTgLink(res.data?.deepLink ?? null);
+                  setTgHint(
+                    res.data?.deepLink
+                      ? 'Открой бота и нажми Start — круг свяжется.'
+                      : 'Задай TELEGRAM_BOT_USERNAME, чтобы появилась ссылка на бота.',
+                  );
+                } catch (err) {
+                  setTgHint(err instanceof Error ? err.message : 'Не удалось создать ссылку');
+                }
+              }}
+            >
+              Привязать Telegram
+            </button>
+            {tgLink ? (
+              <p>
+                <a className="cabinet-inline-link" href={tgLink} target="_blank" rel="noreferrer">
+                  Открыть бота
+                </a>
+              </p>
+            ) : null}
+            {tgHint ? <p className="oracle-auth-hint">{tgHint}</p> : null}
+          </>
+        )}
+      </article>
 
       {error && <p className="cabinet-error">{error}</p>}
 

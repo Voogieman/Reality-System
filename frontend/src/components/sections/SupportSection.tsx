@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useState } from 'react';
 import { useAuth } from '../../auth/AuthContext';
 import { useFormSubmit } from '../../hooks/useFormSubmit';
+import { useLanding } from '../../landing/LandingContext';
 import { realityApi } from '../../lib/api/reality.api';
 import { FormResultBox } from '../ui/FormResult';
 import { Section } from '../ui/Section';
@@ -10,6 +11,7 @@ import './SupportSection.css';
 
 export function SupportSection() {
   const { isAuthenticated, user } = useAuth();
+  const { goBack } = useLanding();
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [email, setEmail] = useState('');
@@ -56,6 +58,9 @@ export function SupportSection() {
       divider="☽ ᛉ ☾"
     >
       <form className="support-form panel-glass" onSubmit={handleSubmit}>
+        <button type="button" className="support-back" onClick={goBack}>
+          ← Назад
+        </button>
         {!isAuthenticated && (
           <div className="form-row">
             <div className="form-group">

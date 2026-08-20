@@ -55,4 +55,19 @@ export class GodOracleDto {
   @ValidateNested()
   @Type(() => OracleOfferingDto)
   offering?: OracleOfferingDto;
+
+  @ApiPropertyOptional({ example: "images" })
+  @IsOptional()
+  @IsString()
+  communicationStyle?: string;
+
+  @ApiPropertyOptional({ example: "stuck" })
+  @IsOptional()
+  @IsString()
+  situationNeed?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  sessionId?: string;
 }

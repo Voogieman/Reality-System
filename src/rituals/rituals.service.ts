@@ -9,6 +9,14 @@ import { DatabaseService } from "../database/database.service";
 import { SLAVIC_GODS } from "../gods/slavic-gods.constants";
 import type { RitualModerationStatus } from "../database/entities";
 import type { AuthUser } from "../auth/jwt-payload.interface";
+import { NotificationService } from "../notifications/notification.service";
+
+const RITUAL_MAIL_STATUS: Record<RitualModerationStatus, string> = {
+  submitted_for_review: "отправлен на проверку",
+  accepted_for_execution: "принят на реализацию",
+  rejected: "отклонён",
+  completed: "выполнен",
+};
 
 @Injectable()
 export class RitualsService {
@@ -16,7 +24,10 @@ export class RitualsService {
   private readonly defaultLocation = "Священная роща";
   private readonly adminEmail = "vugarguliev333@gmail.com";
 
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly notifications: NotificationService
+  ) {}
 
   async getRitualTypes() {
     if (!this.databaseService.isAvailable()) {
@@ -163,6 +174,7 @@ export class RitualsService {
             success: false,
             moderatedAt: new Date(),
           });
+          await this.notifyRitual(ritual.userId, ritual.ritualName, "rejected");
           continue;
         }
 
@@ -172,6 +184,11 @@ export class RitualsService {
           success: false,
           moderatedAt: new Date(),
         });
+        await this.notifyRitual(
+          ritual.userId,
+          ritual.ritualName,
+          "accepted_for_execution"
+        );
         continue;
       }
 
@@ -185,8 +202,23 @@ export class RitualsService {
           success: true,
           completedAt: new Date(),
         });
+        await this.notifyRitual(ritual.userId, ritual.ritualName, "completed");
       }
     }
+  }
+
+  private async notifyRitual(
+    userId: string,
+    ritualName: string,
+    status: RitualModerationStatus
+  ): Promise<void> {
+    const label = RITUAL_MAIL_STATUS[status];
+    await this.notifications.notifyUser(
+      userId,
+      `Ритуал «${ritualName}»: ${label}`,
+      `Статус твоего ритуала «${ritualName}» — ${label}. Подробности в личном кабинете.`,
+      { email: true, telegram: true }
+    );
   }
 
   private getModerationEtaMinutes(seedSource: string): number {

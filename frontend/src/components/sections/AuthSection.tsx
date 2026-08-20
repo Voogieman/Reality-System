@@ -2,6 +2,7 @@ import { type FormEvent, useEffect, useState } from 'react';
 import { useAuth } from '../../auth/AuthContext';
 import { useFormSubmit } from '../../hooks/useFormSubmit';
 import { useLanding } from '../../landing/LandingContext';
+import { TelegramAuthButton } from '../auth/TelegramAuthButton';
 import { FormResultBox } from '../ui/FormResult';
 import { Section } from '../ui/Section';
 import '../ui/Section.css';
@@ -10,7 +11,7 @@ import './AuthSection.css';
 type Mode = 'login' | 'register';
 
 export function AuthSection() {
-  const { isAuthenticated, user, login, register, confirmEmail, logout } = useAuth();
+  const { isAuthenticated, user, login, loginTelegram, register, confirmEmail, logout } = useAuth();
   const { openSection } = useLanding();
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
@@ -142,6 +143,19 @@ export function AuthSection() {
             Регистрация
           </button>
         </div>
+
+        <p className="oracle-auth-hint">Регистрация и вход через Telegram-бота:</p>
+        <TelegramAuthButton
+          onAuth={(payload) => {
+            void submit(
+              async () => {
+                await loginTelegram(payload);
+                return { success: true, message: 'Круг открыт через Telegram.' };
+              },
+              { successFallback: 'Вход через Telegram выполнен' },
+            );
+          }}
+        />
 
         <form className="auth-form" onSubmit={handleSubmit}>
           {mode === 'register' && (
